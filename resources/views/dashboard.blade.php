@@ -99,7 +99,7 @@
             <div class="space-y-8 relative before:absolute before:inset-0 before:ml-[1.1rem] before:-translate-x-px before:h-full before:w-[2px] before:bg-gradient-to-b before:from-indigo-100 before:via-slate-100 before:to-transparent">
                 
                 @forelse($recentActivities as $finding)
-                <div class="relative flex gap-6 items-start group">
+                <a href="{{ route('audit-findings.show', $finding->id) }}" class="relative flex gap-6 items-start group block cursor-pointer">
                     <div class="flex items-center justify-center w-9 h-9 rounded-full border-[3px] border-white bg-indigo-100 text-indigo-600 shadow-sm shrink-0 z-10 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
                         <i class="ph ph-check-circle text-lg font-bold"></i>
                     </div>
@@ -110,7 +110,7 @@
                         </div>
                         <p class="text-xs text-slate-600 font-medium leading-relaxed">{{ $finding->auditor->name }} submitted final report for <span class="text-indigo-600 font-bold">{{ $finding->auditEvent->title ?? 'Event' }}</span></p>
                     </div>
-                </div>
+                </a>
                 @empty
                 <div class="text-sm text-slate-500 font-medium pl-10">No recent activity recorded yet.</div>
                 @endforelse

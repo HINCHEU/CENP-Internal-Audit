@@ -93,13 +93,16 @@
                             <th class="px-6 py-4">Severity</th>
                             <th class="px-6 py-4">Status</th>
                             <th class="px-6 py-4 text-right">Date Logged</th>
+                            <th class="px-6 py-4 text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach($auditEvent->findings as $finding)
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4">
-                                <p class="text-slate-800 font-bold text-sm line-clamp-1 max-w-[300px]">{{ explode("\n", $finding->description)[0] }}</p>
+                                <a href="{{ route('audit-findings.show', $finding->id) }}" class="text-indigo-600 hover:text-indigo-800 font-bold text-sm line-clamp-1 max-w-[300px] transition-colors">
+                                    {{ explode("\n", $finding->description)[0] }}
+                                </a>
                                 <p class="text-[11px] font-semibold text-slate-500 mt-0.5">By {{ $finding->auditor->name ?? 'Unknown' }}</p>
                             </td>
                             <td class="px-6 py-4">
@@ -122,6 +125,11 @@
                             </td>
                             <td class="px-6 py-4 text-right text-sm font-medium text-slate-500">
                                 {{ $finding->created_at->format('M d, Y') }}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="{{ route('audit-findings.show', $finding->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-colors" title="View Details">
+                                    <i class="ph ph-eye text-lg"></i>
+                                </a>
                             </td>
                         </tr>
                         @endforeach
