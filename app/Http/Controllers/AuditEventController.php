@@ -87,6 +87,12 @@ class AuditEventController extends Controller
         return redirect()->route('audit-events.index')->with('success', 'Audit Event updated successfully.');
     }
 
+    public function show(AuditEvent $auditEvent)
+    {
+        $auditEvent->load(['project', 'auditors', 'findings.auditor']);
+        return view('audit-events.show', compact('auditEvent'));
+    }
+
     public function destroy(AuditEvent $auditEvent)
     {
         $auditEvent->delete();

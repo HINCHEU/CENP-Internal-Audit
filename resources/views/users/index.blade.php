@@ -70,13 +70,16 @@
                     </td>
                     <td class="px-8 py-5 text-right">
                         <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <a href="{{ route('users.edit', $u->id) }}" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                            <a href="{{ route('users.show', $u->id) }}" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="View">
+                                <i class="ph ph-eye text-lg"></i>
+                            </a>
+                            <a href="{{ route('users.edit', $u->id) }}" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
                                 <i class="ph ph-pencil-simple text-lg"></i>
                             </a>
                             <form id="delete-user-{{ $u->id }}" action="{{ route('users.destroy', $u->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" onclick="confirmDelete('delete-user-{{ $u->id }}', 'this user')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                                <button type="button" onclick="confirmDelete('delete-user-{{ $u->id }}', 'this user')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete">
                                     <i class="ph ph-trash text-lg"></i>
                                 </button>
                             </form>

@@ -12,6 +12,7 @@ class AuditFinding extends Model {
         'description',
         'evidence_file_path',
         'status',
+        'edit_request_status',
     ];
 
     public function auditEvent()

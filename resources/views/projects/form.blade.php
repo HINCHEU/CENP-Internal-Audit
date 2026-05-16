@@ -27,7 +27,7 @@
             <!-- Project Code -->
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Project Code</label>
-                <input type="text" name="project_code" value="{{ old('project_code', $project->project_code) }}" class="w-full px-5 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 text-slate-500 font-bold" readonly>
+                <input type="text" name="project_code" value="{{ old('project_code', $project->project_code) }}" class="w-full px-5 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 text-slate-500 font-bold" {{ $project->exists ? 'readonly' : '' }}>
                 @error('project_code')<p class="text-rose-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 

@@ -47,6 +47,11 @@ class DepartmentController extends Controller
         return redirect()->route('departments.index')->with('success', 'Department updated successfully.');
     }
 
+    public function show(Department $department)
+    {
+        return view('departments.show', compact('department'));
+    }
+
     public function destroy(Department $department)
     {
         $department->delete();

@@ -72,6 +72,11 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
 
+    public function show(\App\Models\User $user)
+    {
+        return view('users.show', compact('user'));
+    }
+
     public function destroy(\App\Models\User $user)
     {
         $user->delete();

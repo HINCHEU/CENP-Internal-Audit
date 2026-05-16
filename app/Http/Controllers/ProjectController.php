@@ -71,6 +71,12 @@ class ProjectController extends Controller
         return redirect()->route('projects.index')->with('success', 'Project updated successfully.');
     }
 
+    public function show(Project $project)
+    {
+        $project->load(['department', 'manager', 'auditEvents']);
+        return view('projects.show', compact('project'));
+    }
+
     public function destroy(Project $project)
     {
         $project->delete();

@@ -98,7 +98,9 @@
                         <th class="px-6 py-4">Audit Event</th>
                         <th class="px-6 py-4">Severity</th>
                         <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Edit Request</th>
                         <th class="px-6 py-4 text-right">Date Logged</th>
+                        <th class="px-6 py-4 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -129,13 +131,40 @@
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold text-emerald-600 bg-emerald-50">Closed</span>
                             @endif
                         </td>
+                        <td class="px-6 py-4">
+                            @if($finding->edit_request_status === 'pending')
+                                <div class="flex items-center gap-2">
+                                    <form action="{{ route('audit-findings.approve-edit', $finding->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-colors">Approve</button>
+                                    </form>
+                                    <form action="{{ route('audit-findings.approve-edit', $finding->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-lg transition-colors">Reject</button>
+                                    </form>
+                                </div>
+                            @elseif($finding->edit_request_status === 'approved')
+                                <span class="text-xs font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-md">Approved</span>
+                            @elseif($finding->edit_request_status === 'rejected')
+                                <span class="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-md">Rejected</span>
+                            @else
+                                <span class="text-xs font-medium text-slate-400">-</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-right text-sm font-medium text-slate-500">
                             {{ $finding->created_at->format('M d, Y') }}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <a href="{{ route('audit-findings.show', $finding->id) }}" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors inline-block" title="View Details">
+                                <i class="ph ph-eye text-lg"></i>
+                            </a>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-8 text-center text-slate-500 font-medium">No findings recorded yet.</td>
+                        <td colspan="7" class="px-6 py-8 text-center text-slate-500 font-medium">No findings recorded yet.</td>
                     </tr>
                     @endforelse
                 </tbody>

@@ -26,20 +26,24 @@ Route::middleware('auth')->group(function () {
     // My Audits (Available to ALL authenticated users)
     Route::get('/my-audits', [MyAuditController::class, 'index'])->name('audits.index');
     Route::get('/my-audits/{id}/submit', [MyAuditController::class, 'show'])->name('audits.submit');
+    Route::post('/my-audits/{id}/request-edit', [MyAuditController::class, 'requestEdit'])->name('audits.request-edit');
     Route::resource('audit-findings', AuditFindingController::class)->except(['index', 'show']);
+    Route::get('/audit-findings/{id}', [AuditFindingController::class, 'show'])->name('audit-findings.show');
 
     // Admin-Only Routes
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         
-        Route::resource('departments', DepartmentController::class)->except(['show']);
+        Route::resource('departments', DepartmentController::class);
         
-        Route::resource('users', UserController::class)->except(['show']);
+        Route::resource('users', UserController::class);
         
-        Route::resource('projects', ProjectController::class)->except(['show']);
+        Route::resource('projects', ProjectController::class);
         
-        Route::resource('audit-events', AuditEventController::class)->except(['show']);
+        Route::resource('audit-events', AuditEventController::class);
         
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        
+        Route::post('/audit-findings/{id}/approve-edit', [AuditFindingController::class, 'approveEdit'])->name('audit-findings.approve-edit');
     });
 });
