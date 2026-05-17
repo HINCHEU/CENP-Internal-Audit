@@ -89,8 +89,8 @@
                 </div>
 
                 <div class="flex items-center justify-between">
-                    <label class="flex items-center gap-2 cursor-pointer group">
-                        <input type="checkbox" name="remember" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 transition-colors">
+                    <label for="remember" class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" name="remember" id="remember" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 transition-colors" {{ old('remember') ? 'checked' : '' }}>
                         <span class="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember me for 30 days</span>
                     </label>
                 </div>
