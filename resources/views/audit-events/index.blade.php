@@ -13,11 +13,11 @@
                 <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
                 <input v-model="search" type="text" placeholder="Search events..." class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all focus:bg-white">
             </div>
-            <select class="px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-600 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-                <option>All Statuses</option>
-                <option>Pending</option>
-                <option>In Progress</option>
-                <option>Completed</option>
+            <select v-model="statusFilter" class="px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-600 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
             </select>
         </div>
         <a href="{{ route('audit-events.create') }}" class="w-full sm:w-auto bg-gradient-primary hover:opacity-90 text-white px-6 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30 premium-hover">
@@ -41,7 +41,10 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse($events as $event)
-                <tr v-show="!search || '{{ strtolower(addslashes($event->title . ' ' . ($event->project->name ?? ''))) }}'.includes(search.toLowerCase())" class="hover:bg-slate-50 transition-colors group">
+                @php
+                    $eventStatus = strtolower(str_replace(' ', '_', $event->submissionStatus()));
+                @endphp
+                <tr v-show="filterRow('{{ strtolower(addslashes($event->title . ' ' . ($event->project->name ?? ''))) }}', '{{ $eventStatus }}')" :data-event-id="'{{ $event->id }}'" :data-status="'{{ $eventStatus }}'" class="hover:bg-slate-50 transition-colors group">
                     <td class="px-8 py-5">
                         <p class="text-slate-800 font-bold text-sm">{{ $event->title }}</p>
                         <p class="text-[11px] font-semibold text-slate-500 mt-0.5">EVT-{{ $event->id }}</p>
@@ -108,23 +111,7 @@
                         @endif
                     </td>
                     <td class="px-6 py-5">
-                        @php
-                            $eventDate = \Carbon\Carbon::parse($event->audit_date);
-                        @endphp
-
-                        @if($eventDate->isFuture())
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                                Pending
-                            </span>
-                        @elseif($eventDate->isToday())
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-600 border border-indigo-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span> Today
-                            </span>
-                        @else
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Past
-                            </span>
-                        @endif
+                        @include('audit-events.partials.submission-status-badge', ['status' => $event->submissionStatus()])
                     </td>
                     <td class="px-8 py-5 text-right">
                         <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -177,7 +164,15 @@
         createApp({
             setup() {
                 const search = ref('');
-                return { search };
+                const statusFilter = ref('');
+                
+                const filterRow = (title, status) => {
+                    const searchMatch = !search.value || title.includes(search.value.toLowerCase());
+                    const statusMatch = !statusFilter.value || status === statusFilter.value;
+                    return searchMatch && statusMatch;
+                };
+                
+                return { search, statusFilter, filterRow };
             }
         }).mount('#module-app');
 

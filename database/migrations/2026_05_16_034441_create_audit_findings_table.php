@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('audit_event_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // Auditor who logged it
-            $table->string('finding_type'); // Major, Minor, Observation
+            $table->string('finding_type'); // Commendation, Non-conformance Report
             $table->text('description');
             $table->string('evidence_file_path')->nullable();
             $table->enum('status', ['open', 'resolved', 'closed'])->default('open');

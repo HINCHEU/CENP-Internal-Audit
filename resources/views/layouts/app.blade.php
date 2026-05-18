@@ -46,7 +46,7 @@
     </style>
 </head>
 <body class="h-full flex overflow-hidden text-[#1E293B] antialiased bg-[#F4F7FB]">
-    
+
     <!-- Sidebar -->
     <aside class="w-[280px] bg-[#0A0F1C] border-r border-white/5 flex flex-col justify-between hidden md:flex shadow-2xl z-20 relative">
         <!-- Subtle Glow behind sidebar -->

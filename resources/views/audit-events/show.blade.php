@@ -31,17 +31,18 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3 shrink-0">
-                    @if($eventDate->isFuture())
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                            <span class="w-2 h-2 rounded-full bg-slate-400"></span> Pending
+                    @php $eventStatus = $auditEvent->submissionStatus(); @endphp
+                    @if($eventStatus === 'completed')
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Completed
                         </span>
-                    @elseif($eventDate->isToday())
+                    @elseif($eventStatus === 'in_progress')
                         <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> Today
+                            <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> In Progress
                         </span>
                     @else
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Past
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            <span class="w-2 h-2 rounded-full bg-slate-400"></span> Pending
                         </span>
                     @endif
                 </div>
@@ -213,7 +214,7 @@
                         <thead>
                             <tr class="bg-slate-50/90 text-slate-500 text-[10px] uppercase tracking-wider font-extrabold">
                                 <th class="px-6 py-4">Finding</th>
-                                <th class="px-6 py-4">Severity</th>
+                                <th class="px-6 py-4">Type</th>
                                 <th class="px-6 py-4">Status</th>
                                 <th class="px-6 py-4 text-right">Logged</th>
                                 <th class="px-6 py-4 text-center w-16"></th>
@@ -229,13 +230,7 @@
                                     <p class="text-[10px] font-semibold text-slate-500 mt-0.5">By {{ $finding->auditor->name ?? 'Unknown' }}</p>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if(str_contains(strtolower($finding->finding_type), 'major'))
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">Major</span>
-                                    @elseif(str_contains(strtolower($finding->finding_type), 'minor'))
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100">Minor</span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-sky-600 border border-sky-100">Obsv</span>
-                                    @endif
+                                    @include('audit-findings.partials.finding-type-badge', ['finding' => $finding, 'compact' => true])
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($finding->status == 'open')

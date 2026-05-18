@@ -27,9 +27,9 @@ class ReportController extends Controller
         $recentFindings = AuditFinding::with(['auditEvent.project', 'auditor'])->latest()->take(5)->get();
 
         $chartData = [
-            'major' => $findingsByType['Major Non-conformance'] ?? 0,
-            'minor' => $findingsByType['Minor Non-conformance'] ?? 0,
-            'observation' => $findingsByType['Observation'] ?? 0,
+            'commendation' => $findingsByType[AuditFinding::TYPE_COMMENDATION] ?? 0,
+            'non_conformance' => $findingsByType[AuditFinding::TYPE_NON_CONFORMANCE] ?? 0,
+            'observation' => $findingsByType[AuditFinding::TYPE_OBSERVATION] ?? 0,
         ];
 
         $statusData = [

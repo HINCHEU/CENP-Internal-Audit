@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     
     // My Audits (Available to ALL authenticated users)
     Route::get('/my-audits', [MyAuditController::class, 'index'])->name('audits.index');
+    Route::get('/my-audits/{id}', [MyAuditController::class, 'viewSubmission'])->name('audits.show');
     Route::get('/my-audits/{id}/submit', [MyAuditController::class, 'show'])->name('audits.submit');
     Route::post('/my-audits/{id}/request-edit', [MyAuditController::class, 'requestEdit'])->name('audits.request-edit');
     Route::resource('audit-findings', AuditFindingController::class)->except(['index', 'show']);
@@ -43,6 +44,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('audit-events', AuditEventController::class);
         
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+        Route::get('/audit-findings', [AuditFindingController::class, 'index'])->name('audit-findings.index');
         
         Route::post('/audit-findings/{id}/approve-edit', [AuditFindingController::class, 'approveEdit'])->name('audit-findings.approve-edit');
     });

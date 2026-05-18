@@ -26,9 +26,9 @@
                     <label class="block text-sm font-bold text-slate-700 mb-2">Finding Type <span class="text-rose-500">*</span></label>
                     <select name="finding_type" class="w-full px-5 py-4 text-base border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-bold text-slate-700 bg-slate-50 transition-all cursor-pointer">
                         <option value="">Select a type</option>
-                        <option value="Observation" {{ old('finding_type', $finding->finding_type ?? '') == 'Observation' ? 'selected' : '' }}>Observation</option>
-                        <option value="Minor Non-conformance" {{ old('finding_type', $finding->finding_type ?? '') == 'Minor Non-conformance' ? 'selected' : '' }}>Minor Non-conformance</option>
-                        <option value="Major Non-conformance" {{ old('finding_type', $finding->finding_type ?? '') == 'Major Non-conformance' ? 'selected' : '' }}>Major Non-conformance</option>
+                        @foreach(\App\Models\AuditFinding::findingTypes() as $type)
+                        <option value="{{ $type }}" {{ old('finding_type', $finding->finding_type ?? '') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                        @endforeach
                     </select>
                     @error('finding_type')<p class="text-rose-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>

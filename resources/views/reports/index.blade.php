@@ -87,7 +87,7 @@
             <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
                 <i class="ph ph-clock-counter-clockwise text-indigo-500 text-xl"></i> Recent Findings Log
             </h3>
-            <button class="text-sm font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors">View All</button>
+            <a href="{{ route('audit-findings.index') }}" class="text-sm font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors">View All</a>
         </div>
         
         <div class="overflow-x-auto">
@@ -96,7 +96,7 @@
                     <tr class="bg-slate-50/80 text-slate-500 text-[10px] uppercase tracking-wider font-extrabold border-b border-slate-100">
                         <th class="px-6 py-4">Finding Details</th>
                         <th class="px-6 py-4">Audit Event</th>
-                        <th class="px-6 py-4">Severity</th>
+                        <th class="px-6 py-4">Type</th>
                         <th class="px-6 py-4">Status</th>
                         <th class="px-6 py-4">Edit Request</th>
                         <th class="px-6 py-4 text-right">Date Logged</th>
@@ -114,13 +114,7 @@
                             <span class="block truncate max-w-[200px]">{{ $finding->auditEvent->title }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            @if(str_contains(strtolower($finding->finding_type), 'major'))
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-200">Major</span>
-                            @elseif(str_contains(strtolower($finding->finding_type), 'minor'))
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-200">Minor</span>
-                            @else
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-200">Obsv</span>
-                            @endif
+                            @include('audit-findings.partials.finding-type-badge', ['finding' => $finding, 'compact' => true])
                         </td>
                         <td class="px-6 py-4">
                             @if($finding->status == 'open')
@@ -181,8 +175,8 @@
         
         // --- Findings By Type Chart ---
         const typeOptions = {
-            series: [{{ $chartData['major'] }}, {{ $chartData['minor'] }}, {{ $chartData['observation'] }}],
-            labels: ['Major Non-conformance', 'Minor Non-conformance', 'Observation'],
+            series: [{{ $chartData['commendation'] }}, {{ $chartData['non_conformance'] }}, {{ $chartData['observation'] }}],
+            labels: ['Commendation', 'Non-conformance Report', 'Observation'],
             chart: {
                 type: 'donut',
                 height: 320,
@@ -201,7 +195,7 @@
                     }
                 }
             },
-            colors: ['#F43F5E', '#F59E0B', '#3B82F6'], // rose, amber, blue
+            colors: ['#10B981', '#F43F5E', '#3B82F6'], // emerald, rose, blue
             plotOptions: {
                 pie: {
                     donut: {

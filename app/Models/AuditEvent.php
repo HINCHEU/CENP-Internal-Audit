@@ -27,4 +27,37 @@ class AuditEvent extends Model {
     {
         return $this->hasMany(AuditFinding::class);
     }
+
+    /**
+     * pending: no assigned auditor has submitted yet
+     * in_progress: at least one submitted, not all
+     * completed: every assigned auditor has submitted
+     */
+    public function submissionStatus(): string
+    {
+        if (! $this->relationLoaded('auditors')) {
+            $this->load('auditors');
+        }
+        if (! $this->relationLoaded('findings')) {
+            $this->load('findings');
+        }
+
+        $total = $this->auditors->count();
+        if ($total === 0) {
+            return 'pending';
+        }
+
+        $submittedUserIds = $this->findings->pluck('user_id')->unique();
+        $submittedCount = $this->auditors->whereIn('id', $submittedUserIds)->count();
+
+        if ($submittedCount === 0) {
+            return 'pending';
+        }
+
+        if ($submittedCount >= $total) {
+            return 'completed';
+        }
+
+        return 'in_progress';
+    }
 }

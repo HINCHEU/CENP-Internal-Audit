@@ -51,6 +51,26 @@ class MyAuditController extends Controller
 
         return view('audits.submit', compact('auditEvent', 'finding', 'oldScore', 'oldDescription'));
     }
+
+    public function viewSubmission($id)
+    {
+        $auditEvent = AuditEvent::with(['project', 'auditors'])->findOrFail($id);
+
+        $isAssigned = $auditEvent->auditors->contains('id', Auth::id());
+        if (!$isAssigned) {
+            abort(403);
+        }
+
+        $finding = AuditFinding::where('audit_event_id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$finding) {
+            return redirect()->route('audits.submit', $id);
+        }
+
+        return view('audits.show', compact('auditEvent', 'finding'));
+    }
     
     public function requestEdit($id)
     {

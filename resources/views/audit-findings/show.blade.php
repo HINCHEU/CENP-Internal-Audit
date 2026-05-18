@@ -37,13 +37,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
         <div>
             <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Finding Classification</h3>
-            @if(str_contains(strtolower($finding->finding_type), 'major'))
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-rose-50 text-rose-600 border border-rose-200">Major Non-conformance</span>
-            @elseif(str_contains(strtolower($finding->finding_type), 'minor'))
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-amber-50 text-amber-600 border border-amber-200">Minor Non-conformance</span>
-            @else
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-blue-50 text-blue-600 border border-blue-200">Observation</span>
-            @endif
+            @include('audit-findings.partials.finding-type-badge', ['finding' => $finding])
         </div>
 
         <div>

@@ -18,7 +18,10 @@ class DashboardController extends Controller
         $totalDepartments = Department::count();
         $activeProjects = Project::where('status', 'active')->count() ?: Project::count();
         $completedAudits = AuditFinding::count();
-        $pendingAudits = AuditEvent::whereDate('audit_date', '>=', Carbon::today())->count();
+        $pendingAudits = AuditEvent::with(['auditors', 'findings'])
+            ->get()
+            ->filter(fn ($audit) => $audit->submissionStatus() === 'pending')
+            ->count();
 
         $recentActivities = AuditFinding::with(['auditor', 'auditEvent'])->latest()->take(5)->get();
 

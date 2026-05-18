@@ -16,7 +16,8 @@
             $isCompleted = !is_null($finding);
         @endphp
         
-        <div class="bg-white rounded-3xl premium-shadow {{ $isToday && !$isCompleted ? 'border-indigo-200 ring-1 ring-indigo-500/10' : 'border-slate-100' }} overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group relative">
+        <div class="bg-white rounded-3xl premium-shadow {{ $isToday && !$isCompleted ? 'border-indigo-200 ring-1 ring-indigo-500/10' : 'border-slate-100' }} overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group relative {{ $isCompleted ? 'cursor-pointer' : '' }}"
+            @if($isCompleted) onclick="window.location='{{ route('audits.show', $event->id) }}'" role="link" tabindex="0" onkeydown="if(event.key==='Enter')window.location='{{ route('audits.show', $event->id) }}'" @endif>
             @if($isCompleted)
                 <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             @elseif($isToday)
@@ -69,12 +70,15 @@
                 @endif
             </div>
 
-            <div class="p-6 pt-0 relative z-10 mt-auto">
+            <div class="p-6 pt-0 relative z-10 mt-auto" onclick="event.stopPropagation()">
                 @if(!$isCompleted)
                     <a href="{{ route('audits.submit', $event->id) }}" class="w-full flex items-center justify-center gap-2 {{ $isToday ? 'bg-gradient-primary hover:opacity-90 text-white shadow-indigo-500/30 group-hover:shadow-indigo-500/40' : 'bg-slate-800 hover:bg-slate-900 text-white shadow-slate-900/20' }} font-bold py-3.5 rounded-xl transition-all shadow-lg group-hover:shadow-xl">
                         {{ $isPast ? 'Submit Late Audit' : 'Start Audit' }} <i class="ph ph-arrow-right font-bold"></i>
                     </a>
                 @else
+                    <a href="{{ route('audits.show', $event->id) }}" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-500/30 mb-3">
+                        View Submission <i class="ph ph-eye font-bold"></i>
+                    </a>
                     @if($finding->edit_request_status === 'approved')
                         <a href="{{ route('audits.submit', $event->id) }}" class="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-amber-500/30 group-hover:shadow-amber-500/40">
                             Resubmit Audit <i class="ph ph-arrow-counter-clockwise font-bold"></i>

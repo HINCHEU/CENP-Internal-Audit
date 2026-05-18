@@ -3,16 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use Illuminate\Validation\Rule;
 use App\Models\AuditFinding;
 
 class AuditFindingController extends Controller
 {
+    public function index()
+    {
+        $findings = AuditFinding::with(['auditEvent.project', 'auditor'])
+            ->latest()
+            ->paginate(20);
+
+        return view('audit-findings.index', compact('findings'));
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'audit_event_id' => 'required|exists:audit_events,id',
-            'finding_type' => 'required|string',
+            'finding_type' => ['required', 'string', Rule::in(AuditFinding::findingTypes())],
             'description' => 'required|string',
             'evidence_file' => 'nullable|file|max:10240|mimes:pdf,jpg,png,docx',
             'score' => 'required|integer|min:0|max:100',
@@ -33,7 +42,7 @@ class AuditFindingController extends Controller
             'finding_type' => $validated['finding_type'],
             'description' => "Score: " . $validated['score'] . "\n\n" . $validated['description'],
             'evidence_file_path' => $evidencePath,
-            'status' => 'open',
+            'status' => AuditFinding::statusForType($validated['finding_type']),
             'edit_request_status' => null, // reset if they resubmit
         ];
 
