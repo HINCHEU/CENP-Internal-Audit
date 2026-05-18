@@ -79,7 +79,67 @@
         </div>
     </div>
 
+    @php
+        $submissionsByAuditor = $finding->auditEvent->findings->keyBy('user_id');
+    @endphp
+
     <div class="pt-8 border-t border-slate-100">
+        <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-4">Auditor Submission Status</h3>
+
+        @if($finding->auditEvent->auditors->isEmpty())
+            <p class="text-sm font-medium text-slate-500">No auditors assigned to this audit event.</p>
+        @else
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse border border-slate-100 rounded-xl">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-wider font-extrabold">
+                            <th class="px-6 py-4">Auditor</th>
+                            <th class="px-6 py-4">Submission Status</th>
+                            <th class="px-6 py-4 text-right">Submitted On</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($finding->auditEvent->auditors as $auditor)
+                            @php
+                                $submission = $submissionsByAuditor->get($auditor->id);
+                            @endphp
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name={{ urlencode($auditor->name) }}&background=6366F1&color=fff" alt="{{ $auditor->name }}"/>
+                                        <span class="text-sm font-bold text-slate-800">{{ $auditor->name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    @if($submission)
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200">
+                                            <i class="ph ph-check-circle"></i> Submitted
+                                        </span>
+                                        @if($submission->edit_request_status === 'pending')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 ml-2">Edit Requested</span>
+                                        @elseif($submission->edit_request_status === 'approved')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 ml-2">Edit Approved</span>
+                                        @elseif($submission->edit_request_status === 'rejected')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 ml-2">Edit Rejected</span>
+                                        @endif
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold text-slate-500 bg-slate-100 border border-slate-200">
+                                            <i class="ph ph-clock"></i> Not Submitted
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-right text-sm font-medium text-slate-500">
+                                    {{ $submission ? $submission->created_at->format('M d, Y') : '-' }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
+
+    <div class="pt-8 border-t border-slate-100 mt-8">
         <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-4">Detailed Description</h3>
         <div class="bg-slate-50 border border-slate-100 rounded-xl p-6">
             <p class="text-sm font-medium text-slate-700 whitespace-pre-wrap leading-relaxed">{{ $parsedDescription }}</p>

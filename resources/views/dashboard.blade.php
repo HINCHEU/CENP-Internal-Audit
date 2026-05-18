@@ -80,16 +80,85 @@
     <!-- Charts / Activity Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <!-- Main Chart Placeholder -->
+        <!-- Main Chart -->
         <div class="lg:col-span-2 bg-white rounded-3xl premium-shadow border border-slate-100 p-8 flex flex-col relative overflow-hidden">
-            <div class="flex items-center justify-between mb-8 relative z-10">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-800">Project Performance Trends</h3>
-                    <p class="text-sm text-slate-500 mt-1">Average estimated audit scores across projects.</p>
+            <div class="flex flex-col gap-6 mb-6 relative z-10">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Project Performance Trends</h3>
+                        <p class="text-sm text-slate-500 mt-1" id="chart-subtitle">{{ $chart['subtitle'] }}</p>
+                    </div>
+                    <a href="{{ route('dashboard') }}" class="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors px-3 py-2 rounded-lg hover:bg-slate-50">
+                        <i class="ph ph-arrow-counter-clockwise"></i> Reset filters
+                    </a>
                 </div>
+
+                <form method="GET" action="{{ route('dashboard') }}" id="chart-filters" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50/80 border border-slate-100">
+                    <div>
+                        <label for="filter_project" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Project</label>
+                        <select name="project_id" id="filter_project" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-700 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                            <option value="">All projects</option>
+                            @foreach($filterProjects as $project)
+                                <option value="{{ $project->id }}" @selected((string) $filters['project_id'] === (string) $project->id)>{{ $project->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="filter_audit" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Audit</label>
+                        <select name="audit_id" id="filter_audit" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-700 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                            <option value="">All audits</option>
+                            @foreach($filterAudits as $audit)
+                                <option value="{{ $audit->id }}" data-project-id="{{ $audit->project_id }}" @selected((string) $filters['audit_id'] === (string) $audit->id)>
+                                    {{ $audit->title }} ({{ \Carbon\Carbon::parse($audit->audit_date)->format('M d, Y') }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="filter_metric" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Metric</label>
+                        <select name="metric" id="filter_metric" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-700 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                            <option value="score" @selected($filters['metric'] === 'score')>Average score</option>
+                            <option value="submission" @selected($filters['metric'] === 'submission')>Submission rate</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="filter_date_from" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Date from</label>
+                        <input type="date" name="date_from" id="filter_date_from" value="{{ $filters['date_from'] }}" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-700 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                    </div>
+
+                    <div>
+                        <label for="filter_date_to" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Date to</label>
+                        <input type="date" name="date_to" id="filter_date_to" value="{{ $filters['date_to'] }}" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-700 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                    </div>
+
+                    <div>
+                        <label for="filter_department" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Submit · department</label>
+                        <select name="department_id" id="filter_department" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-700 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                            <option value="">All departments</option>
+                            @foreach($filterDepartments as $department)
+                                <option value="{{ $department->id }}" @selected((string) $filters['department_id'] === (string) $department->id)>{{ $department->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-2 xl:col-span-3 flex justify-end">
+                        <button type="submit" class="inline-flex items-center gap-2 bg-gradient-primary hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-indigo-500/25 transition-all">
+                            <i class="ph ph-funnel text-lg"></i> Apply filters
+                        </button>
+                    </div>
+                </form>
             </div>
+
             <div class="flex-1 min-h-[300px] relative" id="performance-chart">
-                <!-- ApexChart will inject here -->
+                @if(empty($chart['labels']))
+                    <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                        <i class="ph ph-chart-bar text-4xl text-slate-300 mb-3"></i>
+                        <p class="text-sm font-semibold text-slate-500">{{ $chart['subtitle'] }}</p>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -123,26 +192,53 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        const chartLabels = @json($chart['labels']);
+        const chartValues = @json($chart['values']);
+        const chartMetric = @json($chart['metric']);
+        const seriesName = chartMetric === 'submission' ? 'Submission Rate (%)' : 'Average Score';
+
+        const projectSelect = document.getElementById('filter_project');
+        const auditSelect = document.getElementById('filter_audit');
+
+        if (projectSelect && auditSelect) {
+            const auditOptions = Array.from(auditSelect.querySelectorAll('option[data-project-id]'));
+
+            function filterAuditOptions() {
+                const projectId = projectSelect.value;
+                auditOptions.forEach(function(option) {
+                    const show = !projectId || option.dataset.projectId === projectId;
+                    option.hidden = !show;
+                    option.disabled = !show;
+                });
+                const selected = auditSelect.selectedOptions[0];
+                if (selected && selected.disabled) {
+                    auditSelect.value = '';
+                }
+            }
+
+            projectSelect.addEventListener('change', filterAuditOptions);
+            filterAuditOptions();
+        }
+
+        if (!chartLabels.length) {
+            return;
+        }
+
         const options = {
             series: [{
-                name: 'Average Score',
-                data: {!! json_encode($chartScores) !!}
+                name: seriesName,
+                data: chartValues
             }],
             chart: {
                 type: 'bar',
                 height: 350,
                 fontFamily: 'inherit',
-                toolbar: {
-                    show: false
-                },
+                toolbar: { show: false },
                 animations: {
                     enabled: true,
                     easing: 'easeinout',
                     speed: 800,
-                    dynamicAnimation: {
-                        enabled: true,
-                        speed: 350
-                    }
+                    dynamicAnimation: { enabled: true, speed: 350 }
                 }
             },
             plotOptions: {
@@ -152,14 +248,10 @@
                     distributed: true,
                 }
             },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                width: 0
-            },
+            dataLabels: { enabled: false },
+            stroke: { width: 0 },
             xaxis: {
-                categories: {!! json_encode($chartLabels) !!},
+                categories: chartLabels,
                 labels: {
                     style: {
                         colors: '#64748b',
@@ -167,39 +259,37 @@
                         fontWeight: 600,
                     }
                 },
-                axisBorder: {
-                    show: false
-                },
-                axisTicks: {
-                    show: false
-                }
+                axisBorder: { show: false },
+                axisTicks: { show: false }
             },
             yaxis: {
                 max: 100,
                 labels: {
+                    formatter: function(val) {
+                        return chartMetric === 'submission' ? val + '%' : val;
+                    },
                     style: {
                         colors: '#64748b',
                         fontSize: '12px',
                         fontWeight: 600,
+                    }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return chartMetric === 'submission' ? val + '%' : val;
                     }
                 }
             },
             grid: {
                 borderColor: '#f1f5f9',
                 strokeDashArray: 4,
-                yaxis: {
-                    lines: {
-                        show: true
-                    }
-                }
+                yaxis: { lines: { show: true } }
             },
-            theme: {
-                palette: 'palette1'
-            },
+            theme: { palette: 'palette1' },
             colors: ['#6366F1', '#8B5CF6', '#10B981', '#F59E0B', '#F43F5E', '#3B82F6'],
-            legend: {
-                show: false
-            }
+            legend: { show: false }
         };
 
         const chart = new ApexCharts(document.querySelector("#performance-chart"), options);

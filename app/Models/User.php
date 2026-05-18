@@ -50,6 +50,13 @@ class User extends Authenticatable
         return $this->hasMany(AuditFinding::class, 'user_id');
     }
 
+    public function unsubmittedAuditsCount(): int
+    {
+        return $this->auditEvents()
+            ->whereDoesntHave('findings', fn ($q) => $q->where('user_id', $this->id))
+            ->count();
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

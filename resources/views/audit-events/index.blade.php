@@ -5,7 +5,7 @@
 @section('subheader', 'Manage and schedule audit events across projects.')
 
 @section('content')
-<div id="module-app" class="bg-white rounded-3xl premium-shadow border border-slate-100 overflow-hidden flex flex-col">
+<div id="module-app" class="bg-white rounded-3xl premium-shadow border border-slate-100 flex flex-col">
     <!-- Toolbar -->
     <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white">
         <div class="flex items-center gap-4 w-full sm:w-auto">
@@ -26,14 +26,15 @@
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+    <div class="overflow-x-auto overflow-y-visible">
+        <table class="w-full text-left border-collapse overflow-visible">
             <thead>
                 <tr class="bg-slate-50/80 text-slate-500 text-[11px] uppercase tracking-wider font-extrabold border-b border-slate-100">
                     <th class="px-8 py-5">Audit Details</th>
                     <th class="px-6 py-5">Project</th>
                     <th class="px-6 py-5">Schedule</th>
                     <th class="px-6 py-5">Auditors</th>
+                    <th class="px-6 py-5">Submitted</th>
                     <th class="px-6 py-5">Status</th>
                     <th class="px-8 py-5 text-right">Actions</th>
                 </tr>
@@ -68,10 +69,49 @@
                     </td>
                     <td class="px-6 py-5">
                         @php
-                            $eventDate = \Carbon\Carbon::parse($event->audit_date);
-                            $now = \Carbon\Carbon::now();
+                            $totalAuditors = $event->auditors->count();
+                            $submittedUserIds = $event->findings->pluck('user_id');
+                            $submittedCount = $event->auditors->whereIn('id', $submittedUserIds)->count();
+                            $percent = $totalAuditors > 0 ? (int) round(($submittedCount / $totalAuditors) * 100) : 0;
+                            $submittedAuditors = $event->auditors->whereIn('id', $submittedUserIds);
+                            $pendingAuditors = $event->auditors->whereNotIn('id', $submittedUserIds);
                         @endphp
-                        
+
+                        @if($totalAuditors === 0)
+                            <span class="text-slate-400 text-xs font-medium">-</span>
+                        @else
+                            <button
+                                type="button"
+                                class="submission-trigger text-left min-w-[120px] rounded-xl px-3 py-2 -mx-3 -my-2 cursor-pointer hover:bg-indigo-50/80 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                data-submitted='@json($submittedAuditors->pluck("name")->values())'
+                                data-pending='@json($pendingAuditors->pluck("name")->values())'
+                                data-percent="{{ $percent }}"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                            >
+                                <p class="text-sm font-bold text-slate-800 whitespace-nowrap flex items-center gap-1.5">
+                                    {{ $submittedCount }} of {{ $totalAuditors }} submitted
+                                    <i class="ph ph-info text-indigo-400 text-sm"></i>
+                                </p>
+                                <div class="flex items-center gap-2 mt-1.5">
+                                    <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden min-w-[72px]">
+                                        <div class="h-full rounded-full transition-all duration-300
+                                            @if($percent >= 100) bg-emerald-500
+                                            @elseif($percent >= 50) bg-amber-500
+                                            @else bg-rose-500 @endif"
+                                            style="width: {{ $percent }}%">
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-extrabold text-slate-500">{{ $percent }}%</span>
+                                </div>
+                            </button>
+                        @endif
+                    </td>
+                    <td class="px-6 py-5">
+                        @php
+                            $eventDate = \Carbon\Carbon::parse($event->audit_date);
+                        @endphp
+
                         @if($eventDate->isFuture())
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
                                 Pending
@@ -106,7 +146,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-8 py-8 text-center text-slate-500 font-medium">
+                    <td colspan="7" class="px-8 py-8 text-center text-slate-500 font-medium">
                         No audit events scheduled yet.
                     </td>
                 </tr>
@@ -120,6 +160,17 @@
         {{ $events->links() }}
     </div>
 </div>
+
+<div id="submission-popover" class="hidden fixed z-[9999] w-72 bg-white border border-slate-200 rounded-xl shadow-xl p-4" role="dialog" aria-label="Submission details">
+    <div class="flex items-center justify-between mb-3">
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Submission Details</p>
+        <button type="button" id="submission-popover-close" class="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" aria-label="Close">
+            <i class="ph ph-x text-sm"></i>
+        </button>
+    </div>
+    <div id="submission-popover-body"></div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const { createApp, ref } = Vue;
@@ -129,6 +180,157 @@
                 return { search };
             }
         }).mount('#module-app');
+
+        const popover = document.getElementById('submission-popover');
+        const popoverBody = document.getElementById('submission-popover-body');
+        const popoverClose = document.getElementById('submission-popover-close');
+        let activeTrigger = null;
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function avatarUrl(name, color) {
+            return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=' + color + '&color=fff&size=32';
+        }
+
+        function renderAuditorList(names, type) {
+            if (!names.length) return '';
+
+            const isSubmitted = type === 'submitted';
+            const label = isSubmitted ? 'Submitted' : 'Not Submitted';
+            const icon = isSubmitted ? 'ph-check-circle' : 'ph-clock';
+            const labelClass = isSubmitted ? 'text-emerald-600' : 'text-slate-400';
+            const textClass = isSubmitted ? 'text-slate-700' : 'text-slate-500';
+            const bgColor = isSubmitted ? '10B981' : 'CBD5E1';
+
+            const items = names.map(name =>
+                '<li class="text-xs font-semibold ' + textClass + ' flex items-center gap-2">' +
+                    '<img class="h-5 w-5 rounded-full" src="' + avatarUrl(name, bgColor) + '" alt="' + escapeHtml(name) + '"/>' +
+                    escapeHtml(name) +
+                '</li>'
+            ).join('');
+
+            return '<div class="mb-3 last:mb-0">' +
+                '<p class="text-[10px] font-bold ' + labelClass + ' uppercase tracking-wider mb-1.5 flex items-center gap-1">' +
+                    '<i class="ph ' + icon + '"></i> ' + label + ' (' + names.length + ')' +
+                '</p>' +
+                '<ul class="space-y-1">' + items + '</ul>' +
+            '</div>';
+        }
+
+        function populatePopover(submitted, pending, percent) {
+            let html = renderAuditorList(submitted, 'submitted') + renderAuditorList(pending, 'pending');
+
+            if (percent >= 100) {
+                html += '<p class="text-[10px] font-bold text-emerald-600 mt-3 pt-3 border-t border-slate-100">All auditors have submitted.</p>';
+            }
+
+            if (!html) {
+                html = '<p class="text-xs font-medium text-slate-500">No auditor data available.</p>';
+            }
+
+            popoverBody.innerHTML = html;
+        }
+
+        function positionPopover(trigger) {
+            popover.classList.remove('hidden');
+            popover.style.visibility = 'hidden';
+
+            const rect = trigger.getBoundingClientRect();
+            const popoverRect = popover.getBoundingClientRect();
+            const gap = 8;
+            const padding = 12;
+
+            let top = rect.bottom + gap;
+            let left = rect.left;
+
+            if (left + popoverRect.width > window.innerWidth - padding) {
+                left = window.innerWidth - popoverRect.width - padding;
+            }
+            if (left < padding) {
+                left = padding;
+            }
+
+            if (top + popoverRect.height > window.innerHeight - padding) {
+                top = rect.top - popoverRect.height - gap;
+            }
+            if (top < padding) {
+                top = padding;
+            }
+
+            popover.style.top = top + 'px';
+            popover.style.left = left + 'px';
+            popover.style.visibility = 'visible';
+        }
+
+        function closePopover() {
+            popover.classList.add('hidden');
+            popover.style.visibility = '';
+            if (activeTrigger) {
+                activeTrigger.classList.remove('ring-2', 'ring-indigo-500/30', 'bg-indigo-50/80');
+                activeTrigger.setAttribute('aria-expanded', 'false');
+                activeTrigger = null;
+            }
+        }
+
+        function openPopover(trigger) {
+            const submitted = JSON.parse(trigger.dataset.submitted || '[]');
+            const pending = JSON.parse(trigger.dataset.pending || '[]');
+            const percent = parseInt(trigger.dataset.percent || '0', 10);
+
+            if (activeTrigger === trigger) {
+                closePopover();
+                return;
+            }
+
+            if (activeTrigger) {
+                activeTrigger.classList.remove('ring-2', 'ring-indigo-500/30', 'bg-indigo-50/80');
+                activeTrigger.setAttribute('aria-expanded', 'false');
+            }
+
+            activeTrigger = trigger;
+            trigger.classList.add('ring-2', 'ring-indigo-500/30', 'bg-indigo-50/80');
+            trigger.setAttribute('aria-expanded', 'true');
+
+            populatePopover(submitted, pending, percent);
+            positionPopover(trigger);
+        }
+
+        document.querySelectorAll('.submission-trigger').forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openPopover(this);
+            });
+        });
+
+        popoverClose.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closePopover();
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!popover.classList.contains('hidden') &&
+                !popover.contains(e.target) &&
+                !e.target.closest('.submission-trigger')) {
+                closePopover();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePopover();
+            }
+        });
+
+        window.addEventListener('scroll', closePopover, true);
+        window.addEventListener('resize', function() {
+            if (activeTrigger && !popover.classList.contains('hidden')) {
+                positionPopover(activeTrigger);
+            }
+        });
     });
 </script>
 @endsection

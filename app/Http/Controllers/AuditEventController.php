@@ -12,7 +12,7 @@ class AuditEventController extends Controller
 {
     public function index()
     {
-        $events = AuditEvent::with(['project', 'auditors'])->latest()->paginate(10);
+        $events = AuditEvent::with(['project', 'auditors', 'findings'])->latest()->paginate(10);
         return view('audit-events.index', compact('events'));
     }
 
@@ -89,8 +89,49 @@ class AuditEventController extends Controller
 
     public function show(AuditEvent $auditEvent)
     {
-        $auditEvent->load(['project', 'auditors', 'findings.auditor']);
-        return view('audit-events.show', compact('auditEvent'));
+        $auditEvent->load(['project', 'auditors.department', 'findings.auditor']);
+
+        $auditors = $auditEvent->auditors;
+        $submissionTotal = $auditors->count();
+        $submittedUserIds = $auditEvent->findings->pluck('user_id')->unique();
+        $submissionSubmitted = $auditors->whereIn('id', $submittedUserIds)->count();
+        $submissionPercent = $submissionTotal > 0
+            ? (int) round(($submissionSubmitted / $submissionTotal) * 100)
+            : 0;
+
+        $departmentSubmissionStats = $auditors
+            ->groupBy(fn (User $user) => $user->department_id ?? 0)
+            ->map(function ($group) use ($submittedUserIds) {
+                $first = $group->first();
+                $label = $first->department?->name ?? 'No department';
+                $total = $group->count();
+                $submitted = $group->whereIn('id', $submittedUserIds)->count();
+                $percent = $total > 0 ? (int) round(($submitted / $total) * 100) : 0;
+
+                return [
+                    'label' => $label,
+                    'submitted' => $submitted,
+                    'total' => $total,
+                    'percent' => $percent,
+                ];
+            })
+            ->values()
+            ->sortBy('label')
+            ->values()
+            ->all();
+
+        $departmentAveragePercent = count($departmentSubmissionStats) > 0
+            ? (int) round(collect($departmentSubmissionStats)->avg('percent'))
+            : 0;
+
+        return view('audit-events.show', compact(
+            'auditEvent',
+            'submissionTotal',
+            'submissionSubmitted',
+            'submissionPercent',
+            'departmentSubmissionStats',
+            'departmentAveragePercent'
+        ));
     }
 
     public function destroy(AuditEvent $auditEvent)

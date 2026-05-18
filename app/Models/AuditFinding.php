@@ -24,4 +24,14 @@ class AuditFinding extends Model {
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function parsedScore(): ?int
+    {
+        $parts = explode("\n\n", $this->description, 2);
+        if (count($parts) === 2 && str_starts_with($parts[0], 'Score: ')) {
+            return (int) str_replace('Score: ', '', $parts[0]);
+        }
+
+        return null;
+    }
 }

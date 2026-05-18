@@ -93,7 +93,11 @@
                             <div class="flex items-center gap-3.5">
                                 <i class="ph ph-clipboard-text text-xl transition-colors"></i> My Audits
                             </div>
-                            <!-- Badge can be dynamic later -->
+                            @if($pendingAuditsCount > 0)
+                                <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold ring-2 ring-[#0A0F1C]">
+                                    {{ $pendingAuditsCount > 99 ? '99+' : $pendingAuditsCount }}
+                                </span>
+                            @endif
                         </a>
                     </div>
                 </div>
@@ -162,10 +166,14 @@
                     <input type="text" placeholder="Quick search..." class="pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 w-64 shadow-sm transition-all duration-300 focus:w-72">
                 </div>
 
-                <button class="relative p-2.5 text-slate-500 hover:text-indigo-600 transition-colors bg-white rounded-full premium-shadow premium-hover">
+                <a href="{{ route('audits.index') }}" class="relative p-2.5 text-slate-500 hover:text-indigo-600 transition-colors bg-white rounded-full premium-shadow premium-hover" title="My Audits">
                     <i class="ph ph-bell text-xl"></i>
-                    <span class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
-                </button>
+                    @if($pendingAuditsCount > 0)
+                        <span class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold border-2 border-white">
+                            {{ $pendingAuditsCount > 99 ? '99+' : $pendingAuditsCount }}
+                        </span>
+                    @endif
+                </a>
                 <button class="p-2.5 text-slate-500 hover:text-indigo-600 transition-colors bg-white rounded-full premium-shadow premium-hover">
                     <i class="ph ph-gear-six text-xl"></i>
                 </button>

@@ -64,7 +64,7 @@ class AuditFindingController extends Controller
     }
     public function show($id)
     {
-        $finding = AuditFinding::with(['auditEvent.project', 'auditor'])->findOrFail($id);
+        $finding = AuditFinding::with(['auditEvent.project', 'auditEvent.auditors', 'auditEvent.findings', 'auditor'])->findOrFail($id);
         
         // Parse score and description if needed
         $parsedScore = null;
