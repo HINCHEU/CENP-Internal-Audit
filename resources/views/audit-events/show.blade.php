@@ -7,7 +7,7 @@
 @section('content')
 @php
     $eventDate = \Carbon\Carbon::parse($auditEvent->audit_date);
-    $ringColor = $submissionPercent >= 100 ? '#10b981' : ($submissionPercent >= 50 ? '#f59e0b' : '#f43f5e');
+    $ringColor = $overallAverageScore >= 90 ? '#10b981' : ($overallAverageScore >= 70 ? '#f59e0b' : '#f43f5e');
 @endphp
 
 <div class="space-y-6">
@@ -50,26 +50,26 @@
         </div>
     </div>
 
-    {{-- Submission overview --}}
+    {{-- Score overview --}}
     <div class="rounded-3xl premium-shadow border border-slate-100 bg-white overflow-hidden">
         <div class="px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-50/60">
             <div class="flex items-center gap-3">
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
-                    <i class="ph ph-chart-pie-slice text-xl"></i>
+                    <i class="ph ph-chart-bar text-xl"></i>
                 </span>
                 <div>
-                    <h3 class="text-lg font-extrabold text-slate-900">Submission overview</h3>
-                    <p class="text-xs font-medium text-slate-500">Assigned auditors who have logged at least one finding for this event.</p>
+                    <h3 class="text-lg font-extrabold text-slate-900">Audit scores overview</h3>
+                    <p class="text-xs font-medium text-slate-500">Average evaluation scores submitted by auditors for this event.</p>
                 </div>
             </div>
         </div>
 
         <div class="p-8">
-            @if($submissionTotal === 0)
+            @if($scoredFindings === 0)
                 <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-10 text-center">
-                    <i class="ph ph-users text-4xl text-slate-300 mb-3 inline-block"></i>
-                    <p class="text-slate-600 font-semibold">No auditors assigned</p>
-                    <p class="text-sm text-slate-500 mt-1">Assign auditors on edit to track submission progress.</p>
+                    <i class="ph ph-chart-bar text-4xl text-slate-300 mb-3 inline-block"></i>
+                    <p class="text-slate-600 font-semibold">No scores recorded</p>
+                    <p class="text-sm text-slate-500 mt-1">Audit scores will appear once auditors submit findings with evaluation scores.</p>
                 </div>
             @else
                 <div class="grid grid-cols-1 xl:grid-cols-12 gap-10 items-center">
@@ -77,20 +77,20 @@
                     <div class="xl:col-span-5 flex flex-col items-center text-center">
                         <div
                             class="relative h-44 w-44 rounded-full flex items-center justify-center shadow-inner"
-                            style="background: conic-gradient({{ $ringColor }} {{ $submissionPercent }}%, #e2e8f0 0);"
+                            style="background: conic-gradient({{ $ringColor }} {{ min($overallAverageScore * 1.11, 100) }}%, #e2e8f0 0);"
                             role="img"
-                            aria-label="Overall submission {{ $submissionPercent }} percent"
+                            aria-label="Overall average score {{ $overallAverageScore }} out of 100"
                         >
                             <div class="absolute inset-3 rounded-full bg-white flex flex-col items-center justify-center shadow-sm border border-slate-100">
-                                <span class="text-4xl font-extrabold tabular-nums text-slate-900 leading-none">{{ $submissionPercent }}%</span>
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-2">Overall</span>
+                                <span class="text-4xl font-extrabold tabular-nums text-slate-900 leading-none">{{ $overallAverageScore }}</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-2">/ 100</span>
                             </div>
                         </div>
                         <p class="mt-5 text-base font-bold text-slate-800">
-                            {{ $submissionSubmitted }} <span class="text-slate-400 font-semibold">of</span> {{ $submissionTotal }}
-                            <span class="text-slate-600 font-semibold">submitted</span>
+                            <span class="text-slate-400 font-semibold">Based on</span> {{ $scoredFindings }}
+                            <span class="text-slate-600 font-semibold">evaluation{{ $scoredFindings === 1 ? '' : 's' }}</span>
                         </p>
-                        <p class="text-xs font-medium text-slate-500 mt-1 max-w-xs">Average completion across all assigned auditors for this audit.</p>
+                        <p class="text-xs font-medium text-slate-500 mt-1 max-w-xs">Average score across all audit findings submitted for this event.</p>
                     </div>
 
                     {{-- Department breakdown --}}
@@ -101,32 +101,32 @@
                                     <i class="ph ph-buildings text-indigo-500"></i>
                                     By department
                                 </h4>
-                                <p class="text-xs text-slate-500 mt-0.5">Completion rate within each department’s assigned auditors.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Average score within each department's submissions.</p>
                             </div>
-                            @if(count($departmentSubmissionStats) > 1)
+                            @if(count($departmentScoreStats) > 1)
                                 <div class="rounded-xl border border-indigo-100 bg-indigo-50/80 px-4 py-2.5 text-left sm:text-right">
-                                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Avg. of department rates</p>
-                                    <p class="text-xl font-extrabold text-indigo-900 tabular-nums">{{ $departmentAveragePercent }}%</p>
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Avg. of department scores</p>
+                                    <p class="text-xl font-extrabold text-indigo-900 tabular-nums">{{ $departmentAverageScore }}/100</p>
                                 </div>
                             @endif
                         </div>
 
                         <div class="grid gap-3 sm:grid-cols-2">
-                            @foreach($departmentSubmissionStats as $dept)
+                            @foreach($departmentScoreStats as $dept)
                                 @php
-                                    $dp = $dept['percent'];
-                                    $barClass = $dp >= 100 ? 'bg-emerald-500' : ($dp >= 50 ? 'bg-amber-500' : 'bg-rose-500');
+                                    $score = $dept['average_score'];
+                                    $barClass = $score >= 90 ? 'bg-emerald-500' : ($score >= 70 ? 'bg-amber-500' : 'bg-rose-500');
                                 @endphp
                                 <div class="group rounded-2xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:border-indigo-100 hover:shadow-md transition-all duration-300 p-4">
                                     <div class="flex items-start justify-between gap-3 mb-3">
                                         <p class="text-sm font-bold text-slate-800 leading-snug pr-2">{{ $dept['label'] }}</p>
-                                        <span class="shrink-0 text-lg font-extrabold tabular-nums text-slate-900">{{ $dp }}%</span>
+                                        <span class="shrink-0 text-lg font-extrabold tabular-nums text-slate-900">{{ $score }}/100</span>
                                     </div>
                                     <div class="h-2 rounded-full bg-slate-200/80 overflow-hidden mb-2">
-                                        <div class="h-full rounded-full transition-all duration-500 {{ $barClass }}" style="width: {{ $dp }}%"></div>
+                                        <div class="h-full rounded-full transition-all duration-500 {{ $barClass }}" style="width: {{ min($score * 1.11, 100) }}%"></div>
                                     </div>
                                     <p class="text-[11px] font-semibold text-slate-500">
-                                        {{ $dept['submitted'] }} of {{ $dept['total'] }} auditor{{ $dept['total'] === 1 ? '' : 's' }} submitted
+                                        {{ $dept['count'] }} evaluation{{ $dept['count'] === 1 ? '' : 's' }} submitted
                                     </p>
                                 </div>
                             @endforeach

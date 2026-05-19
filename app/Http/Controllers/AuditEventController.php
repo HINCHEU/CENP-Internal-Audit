@@ -91,28 +91,31 @@ class AuditEventController extends Controller
     {
         $auditEvent->load(['project', 'auditors.department', 'findings.auditor']);
 
+        $findings = $auditEvent->findings;
         $auditors = $auditEvent->auditors;
-        $submissionTotal = $auditors->count();
-        $submittedUserIds = $auditEvent->findings->pluck('user_id')->unique();
-        $submissionSubmitted = $auditors->whereIn('id', $submittedUserIds)->count();
-        $submissionPercent = $submissionTotal > 0
-            ? (int) round(($submissionSubmitted / $submissionTotal) * 100)
-            : 0;
 
-        $departmentSubmissionStats = $auditors
+        // Calculate overall average score
+        $scores = $findings->map(fn ($finding) => $finding->parsedScore())->filter(fn ($score) => $score !== null);
+        $overallAverageScore = $scores->count() > 0 ? round($scores->avg(), 2) : 0;
+        $scoredFindings = $scores->count();
+
+        // Calculate department scores
+        $departmentScoreStats = $auditors
             ->groupBy(fn (User $user) => $user->department_id ?? 0)
-            ->map(function ($group) use ($submittedUserIds) {
+            ->map(function ($group) use ($findings) {
                 $first = $group->first();
                 $label = $first->department?->name ?? 'No department';
-                $total = $group->count();
-                $submitted = $group->whereIn('id', $submittedUserIds)->count();
-                $percent = $total > 0 ? (int) round(($submitted / $total) * 100) : 0;
+                $departmentUserIds = $group->pluck('id');
+                
+                $deptFindings = $findings->whereIn('user_id', $departmentUserIds);
+                $deptScores = $deptFindings->map(fn ($finding) => $finding->parsedScore())->filter(fn ($score) => $score !== null);
+                $avgScore = $deptScores->count() > 0 ? round($deptScores->avg(), 2) : 0;
+                $count = $deptScores->count();
 
                 return [
                     'label' => $label,
-                    'submitted' => $submitted,
-                    'total' => $total,
-                    'percent' => $percent,
+                    'average_score' => $avgScore,
+                    'count' => $count,
                 ];
             })
             ->values()
@@ -120,17 +123,16 @@ class AuditEventController extends Controller
             ->values()
             ->all();
 
-        $departmentAveragePercent = count($departmentSubmissionStats) > 0
-            ? (int) round(collect($departmentSubmissionStats)->avg('percent'))
+        $departmentAverageScore = count($departmentScoreStats) > 0
+            ? round(collect($departmentScoreStats)->avg('average_score'), 2)
             : 0;
 
         return view('audit-events.show', compact(
             'auditEvent',
-            'submissionTotal',
-            'submissionSubmitted',
-            'submissionPercent',
-            'departmentSubmissionStats',
-            'departmentAveragePercent'
+            'overallAverageScore',
+            'scoredFindings',
+            'departmentScoreStats',
+            'departmentAverageScore'
         ));
     }
 
