@@ -60,4 +60,21 @@ class AuditEvent extends Model {
 
         return 'in_progress';
     }
+
+    /**
+     * Calculate grade based on average score
+     * A+ >= 95, A >= 90, B >= 85, F < 85
+     */
+    public function calculateGrade(float $score): string
+    {
+        if ($score >= 95) {
+            return 'A+';
+        } elseif ($score >= 90) {
+            return 'A';
+        } elseif ($score >= 85) {
+            return 'B';
+        } else {
+            return 'F';
+        }
+    }
 }

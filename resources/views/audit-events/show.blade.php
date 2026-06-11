@@ -8,6 +8,15 @@
 @php
     $eventDate = \Carbon\Carbon::parse($auditEvent->audit_date);
     $ringColor = $overallAverageScore >= 90 ? '#10b981' : ($overallAverageScore >= 70 ? '#f59e0b' : '#f43f5e');
+    
+    // Determine grade color and styling
+    $gradeColorClass = match($overallGrade) {
+        'A+' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'A' => 'bg-green-50 text-green-700 border-green-200',
+        'B' => 'bg-blue-50 text-blue-700 border-blue-200',
+        'F' => 'bg-red-50 text-red-700 border-red-200',
+        default => 'bg-slate-50 text-slate-700 border-slate-200',
+    };
 @endphp
 
 <div class="space-y-6">
@@ -86,11 +95,18 @@
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-2">/ 100</span>
                             </div>
                         </div>
-                        <p class="mt-5 text-base font-bold text-slate-800">
-                            <span class="text-slate-400 font-semibold">Based on</span> {{ $scoredFindings }}
-                            <span class="text-slate-600 font-semibold">evaluation{{ $scoredFindings === 1 ? '' : 's' }}</span>
-                        </p>
-                        <p class="text-xs font-medium text-slate-500 mt-1 max-w-xs">Average score across all audit findings submitted for this event.</p>
+                        <div class="mt-5 flex flex-col items-center gap-3">
+                            <div class="flex gap-3 items-center">
+                                <p class="text-base font-bold text-slate-800">
+                                    <span class="text-slate-400 font-semibold">Based on</span> {{ $scoredFindings }}
+                                    <span class="text-slate-600 font-semibold">evaluation{{ $scoredFindings === 1 ? '' : 's' }}</span>
+                                </p>
+                            </div>
+                            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border {{ $gradeColorClass }}">
+                                Grade: <span class="text-lg">{{ $overallGrade }}</span>
+                            </span>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500 mt-3 max-w-xs">Average score across all audit findings submitted for this event.</p>
                     </div>
 
                     {{-- Department breakdown --}}

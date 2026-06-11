@@ -99,6 +99,9 @@ class AuditEventController extends Controller
         $overallAverageScore = $scores->count() > 0 ? round($scores->avg(), 2) : 0;
         $scoredFindings = $scores->count();
 
+        // Calculate overall grade
+        $overallGrade = $auditEvent->calculateGrade($overallAverageScore);
+
         // Calculate department scores
         $departmentScoreStats = $auditors
             ->groupBy(fn (User $user) => $user->department_id ?? 0)
@@ -130,6 +133,7 @@ class AuditEventController extends Controller
         return view('audit-events.show', compact(
             'auditEvent',
             'overallAverageScore',
+            'overallGrade',
             'scoredFindings',
             'departmentScoreStats',
             'departmentAverageScore'
