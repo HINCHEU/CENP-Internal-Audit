@@ -99,6 +99,14 @@
                     @error('status')<p class="text-rose-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Approval</label>
+                    <select name="is_approved" class="w-full px-5 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-700">
+                        <option value="1" {{ old('is_approved', $user->is_approved) == 1 ? 'selected' : '' }}>Approved</option>
+                        <option value="0" {{ old('is_approved', $user->is_approved) == 0 ? 'selected' : '' }}>Pending</option>
+                    </select>
+                    @error('is_approved')<p class="text-rose-500 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Password</label>
                     <input type="password" name="password" placeholder="Leave blank to keep current" class="w-full px-5 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-700">
                     @error('password')<p class="text-rose-500 text-xs mt-1">{{ $message }}</p>@enderror

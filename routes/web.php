@@ -18,6 +18,8 @@ Route::get('/', function () {
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('guest');
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register')->middleware('guest');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post')->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // Authenticated Routes
@@ -31,6 +33,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('audit-findings', AuditFindingController::class)->except(['index', 'show']);
     Route::get('/audit-findings/{id}', [AuditFindingController::class, 'show'])->name('audit-findings.show');
 
+    // Quick Evaluations (User side)
+    Route::get('/evaluations', [\App\Http\Controllers\UserEvaluationController::class, 'index'])->name('user-evaluations.index');
+    Route::get('/evaluations/{evaluation}', [\App\Http\Controllers\UserEvaluationController::class, 'show'])->name('user-evaluations.show');
+    Route::post('/evaluations/{evaluation}/score', [\App\Http\Controllers\UserEvaluationController::class, 'storeScore'])->name('user-evaluations.score');
+
     // Admin-Only Routes
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -38,10 +45,13 @@ Route::middleware('auth')->group(function () {
         Route::resource('departments', DepartmentController::class);
         
         Route::resource('users', UserController::class);
+        Route::post('/users/{user}/toggle-approval', [UserController::class, 'toggleApproval'])->name('users.toggle-approval');
         
         Route::resource('projects', ProjectController::class);
         
         Route::resource('audit-events', AuditEventController::class);
+
+        Route::resource('admin-evaluations', \App\Http\Controllers\EvaluationController::class);
         
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 

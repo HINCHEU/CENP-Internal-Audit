@@ -28,7 +28,13 @@ class User extends Authenticatable
         'department_id',
         'phone_number',
         'status',
+        'is_approved',
     ];
+
+    public function evaluationScores()
+    {
+        return $this->hasMany(EvaluationScore::class);
+    }
 
     public function department()
     {

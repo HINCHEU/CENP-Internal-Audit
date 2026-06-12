@@ -12,6 +12,30 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+    public function register(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = \App\Models\User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'role' => 'normal_user',
+            'is_approved' => false,
+        ]);
+
+        return redirect()->route('login')->with('success', 'Registration successful. Please wait for an administrator to approve your account before logging in.');
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -20,6 +44,15 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            if (!Auth::user()->is_approved) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors([
+                    'email' => 'Your account is pending administrator approval.',
+                ])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
             
             // Redirect based on role

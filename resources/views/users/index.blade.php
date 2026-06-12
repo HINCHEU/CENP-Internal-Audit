@@ -26,6 +26,7 @@
                     <th class="px-6 py-5">Role</th>
                     <th class="px-6 py-5">Department</th>
                     <th class="px-6 py-5">Status</th>
+                    <th class="px-6 py-5">Approval</th>
                     <th class="px-8 py-5 text-right">Actions</th>
                 </tr>
             </thead>
@@ -68,8 +69,25 @@
                             </span>
                         @endif
                     </td>
+                    <td class="px-6 py-5">
+                        @if($u->is_approved)
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                Approved
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-600 border border-amber-200">
+                                Pending
+                            </span>
+                        @endif
+                    </td>
                     <td class="px-8 py-5 text-right">
                         <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <form action="{{ route('users.toggle-approval', $u->id) }}" method="POST" class="inline-block">
+                                @csrf
+                                <button type="submit" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="{{ $u->is_approved ? 'Revoke Approval' : 'Approve User' }}">
+                                    <i class="ph {{ $u->is_approved ? 'ph-x-circle' : 'ph-check-circle' }} text-lg"></i>
+                                </button>
+                            </form>
                             <a href="{{ route('users.show', $u->id) }}" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="View">
                                 <i class="ph ph-eye text-lg"></i>
                             </a>

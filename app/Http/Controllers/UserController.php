@@ -59,6 +59,7 @@ class UserController extends Controller
             'role' => 'required|in:admin,super_user,normal_user',
             'department_id' => 'nullable|exists:departments,id',
             'status' => 'required|in:active,inactive',
+            'is_approved' => 'boolean',
             'password' => 'nullable|string|min:6'
         ]);
 
@@ -81,5 +82,13 @@ class UserController extends Controller
     {
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+    }
+
+    public function toggleApproval(\App\Models\User $user)
+    {
+        $user->update([
+            'is_approved' => !$user->is_approved,
+        ]);
+        return redirect()->back()->with('success', 'User approval status updated.');
     }
 }

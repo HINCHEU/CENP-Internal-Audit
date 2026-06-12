@@ -82,6 +82,10 @@
                         <a href="{{ route('audit-events.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('audit-events.*') ? 'active' : '' }}">
                             <i class="ph ph-calendar-check text-xl transition-colors"></i> Audit Events
                         </a>
+
+                        <a href="{{ route('admin-evaluations.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('admin-evaluations.*') ? 'active' : '' }}">
+                            <i class="ph ph-star text-xl transition-colors"></i> Quick Evaluations
+                        </a>
                     </div>
                 </div>
                 @endif
@@ -93,12 +97,21 @@
                             <div class="flex items-center gap-3.5">
                                 <i class="ph ph-clipboard-text text-xl transition-colors"></i> My Audits
                             </div>
-                            @if($pendingAuditsCount > 0)
+                            @if(isset($pendingAuditsCount) && $pendingAuditsCount > 0)
                                 <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold ring-2 ring-[#0A0F1C]">
                                     {{ $pendingAuditsCount > 99 ? '99+' : $pendingAuditsCount }}
                                 </span>
                             @endif
                         </a>
+
+                        @php
+                            $hasSubmittedEvaluations = \App\Models\EvaluationScore::where('user_id', auth()->id())->exists();
+                        @endphp
+                        @if(auth()->user()->role === 'admin' || $hasSubmittedEvaluations)
+                        <a href="{{ route('user-evaluations.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('user-evaluations.*') ? 'active' : '' }}">
+                            <i class="ph ph-star-half text-xl transition-colors"></i> Score Evaluations
+                        </a>
+                        @endif
                     </div>
                 </div>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - CE&P Internal Audit System</title>
+    <title>Register - CE&P Internal Audit System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,25 +34,25 @@
                 <span class="text-indigo-400">Management System</span>
             </h1>
             <p class="text-slate-400 font-medium leading-relaxed max-w-md">
-                Securely manage projects, schedule audit events, and track findings across CE&P Corporation departments.
+                Create an account to participate in Quick Evaluations. Please note that an administrator must approve your account before you can log in.
             </p>
         </div>
     </div>
 
-    <!-- Right Login Section -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center bg-white p-8 sm:p-12 relative">
-        <div class="w-full max-w-[420px]">
+    <!-- Right Register Section -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center bg-white p-8 sm:p-12 relative overflow-y-auto">
+        <div class="w-full max-w-[420px] my-auto">
             <!-- Mobile Logo -->
-            <div class="lg:hidden flex justify-center mb-8">
+            <div class="lg:hidden flex justify-center mb-8 mt-8">
                 <img src="{{ asset('images/logo.png') }}" alt="CE&P Logo" class="h-12">
             </div>
 
-            <div class="mb-10">
-                <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight mb-2">Welcome Back</h2>
-                <p class="text-slate-500 font-medium text-sm">Please enter your credentials to access your account.</p>
+            <div class="mb-8">
+                <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight mb-2">Create Account</h2>
+                <p class="text-slate-500 font-medium text-sm">Register to become an evaluator.</p>
             </div>
 
-            <form action="{{ route('login.post') }}" method="POST" class="space-y-6">
+            <form action="{{ route('register.post') }}" method="POST" class="space-y-5">
                 @csrf
 
                 @if($errors->any())
@@ -67,19 +67,27 @@
                 @endif
 
                 <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Full Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph ph-user text-slate-400 text-lg"></i>
+                        </div>
+                        <input type="text" name="name" value="{{ old('name') }}" required autofocus placeholder="John Doe" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-800 outline-none shadow-sm">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
                     <label class="block text-sm font-bold text-slate-700">Email Address</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="ph ph-envelope-simple text-slate-400 text-lg"></i>
                         </div>
-                        <input type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="name@company.com" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-800 outline-none shadow-sm">
+                        <input type="email" name="email" value="{{ old('email') }}" required placeholder="name@company.com" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-800 outline-none shadow-sm">
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <label class="block text-sm font-bold text-slate-700">Password</label>
-                    </div>
+                    <label class="block text-sm font-bold text-slate-700">Password</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="ph ph-lock-key text-slate-400 text-lg"></i>
@@ -88,29 +96,32 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <label for="remember" class="flex items-center gap-2 cursor-pointer group">
-                        <input type="checkbox" name="remember" id="remember" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 transition-colors" {{ old('remember') ? 'checked' : '' }}>
-                        <span class="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember me for 30 days</span>
-                    </label>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Confirm Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph ph-lock-key text-slate-400 text-lg"></i>
+                        </div>
+                        <input type="password" name="password_confirmation" required placeholder="••••••••" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-800 outline-none shadow-sm">
+                    </div>
                 </div>
 
                 <button type="submit" class="w-full bg-slate-800 hover:bg-indigo-600 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-slate-900/10 hover:shadow-indigo-500/25 flex items-center justify-center gap-2 mt-4 group">
-                    Sign In to Workspace 
+                    Register Account 
                     <i class="ph ph-arrow-right font-bold group-hover:translate-x-1 transition-transform"></i>
                 </button>
             </form>
 
             <div class="mt-6 text-center">
                 <p class="text-sm font-medium text-slate-500">
-                    Don't have an account? 
-                    <a href="{{ route('register') }}" class="text-indigo-600 hover:text-indigo-700 font-bold ml-1 hover:underline">Register</a>
+                    Already have an account? 
+                    <a href="{{ route('login') }}" class="text-indigo-600 hover:text-indigo-700 font-bold ml-1 hover:underline">Sign In</a>
                 </p>
             </div>
 
             <div class="mt-8 text-center pb-8 lg:pb-0">
                 <p class="text-xs font-medium text-slate-400">
-                    &copy; {{ date('Y') }} CE&P Corporation. <br> Internal Audit Management System.
+                    &copy; {{ date('Y') }} CE&P Corporation.
                 </p>
             </div>
         </div>
