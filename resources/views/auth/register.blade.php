@@ -72,7 +72,7 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="ph ph-user text-slate-400 text-lg"></i>
                         </div>
-                        <input type="text" name="name" value="{{ old('name') }}" required autofocus placeholder="John Doe" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-800 outline-none shadow-sm">
+                        <input type="text" name="name" value="{{ old('name') }}" required autofocus placeholder="HIN CHEU" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-800 outline-none shadow-sm">
                     </div>
                 </div>
 
@@ -83,6 +83,26 @@
                             <i class="ph ph-envelope-simple text-slate-400 text-lg"></i>
                         </div>
                         <input type="email" name="email" value="{{ old('email') }}" required placeholder="name@company.com" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-800 outline-none shadow-sm">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Department</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph ph-buildings text-slate-400 text-lg"></i>
+                        </div>
+                        <select name="department_id" required class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-800 outline-none shadow-sm appearance-none cursor-pointer">
+                            <option value="">Select your department</option>
+                            @foreach($departments as $department)
+                                <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
+                                    {{ $department->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                            <i class="ph ph-caret-down text-slate-400"></i>
+                        </div>
                     </div>
                 </div>
 

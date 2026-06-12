@@ -14,7 +14,8 @@ class AuthController extends Controller
 
     public function showRegister()
     {
-        return view('auth.register');
+        $departments = \App\Models\Department::orderBy('name')->get();
+        return view('auth.register', compact('departments'));
     }
 
     public function register(Request $request)
@@ -23,12 +24,14 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'department_id' => ['required', 'exists:departments,id'],
         ]);
 
         $user = \App\Models\User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'department_id' => $validated['department_id'],
             'role' => 'normal_user',
             'is_approved' => false,
         ]);
