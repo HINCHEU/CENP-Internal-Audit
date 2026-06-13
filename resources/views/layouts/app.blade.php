@@ -44,12 +44,15 @@
         /* Gradients */
         .text-gradient { background: linear-gradient(135deg, #4F46E5 0%, #9333EA 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .bg-gradient-primary { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); }
+        /* Mobile sidebar overlay and open state */
+        #mobile-sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(2,6,23,0.5); z-index: 45; }
+        .mobile-open { display: flex !important; position: fixed !important; left: 0; top: 0; bottom: 0; width: 280px; z-index: 50; }
     </style>
 </head>
 <body class="h-full flex overflow-hidden text-[#1E293B] antialiased bg-[#F4F7FB]">
 
     <!-- Sidebar -->
-    <aside class="w-[280px] bg-[#0A0F1C] border-r border-white/5 flex flex-col justify-between hidden md:flex shadow-2xl z-20 relative">
+    <aside id="main-sidebar" class="w-[280px] bg-[#0A0F1C] border-r border-white/5 flex flex-col justify-between hidden md:flex shadow-2xl z-20 relative">
         <!-- Subtle Glow behind sidebar -->
         <div class="absolute top-0 left-0 w-full h-64 bg-indigo-500/10 blur-[80px] -z-10 pointer-events-none"></div>
 
@@ -63,6 +66,12 @@
                     <h2 class="text-white font-bold text-lg tracking-tight leading-tight">CE&P Audit</h2>
                     <p class="text-indigo-300/70 text-[10px] font-semibold uppercase tracking-widest">Internal System</p>
                 </div>
+            </div>
+            <!-- Mobile: close button -->
+            <div class="px-4 md:hidden">
+                <button id="mobile-close-button" class="p-2.5 text-slate-400 hover:text-white transition-colors bg-transparent rounded-full">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
             </div>
             
             <!-- Navigation -->
@@ -188,8 +197,8 @@
                         </span>
                     @endif
                 </a>
-                <button class="p-2.5 text-slate-500 hover:text-indigo-600 transition-colors bg-white rounded-full premium-shadow premium-hover">
-                    <i class="ph ph-gear-six text-xl"></i>
+                <button id="mobile-menu-button" class="p-2.5 text-slate-500 hover:text-indigo-600 transition-colors bg-white rounded-full premium-shadow premium-hover md:hidden" title="Open Menu">
+                    <i class="ph ph-list text-xl"></i>
                 </button>
             </div>
         </header>
@@ -202,7 +211,10 @@
         </main>
     </div>
 
-    <!-- SweetAlert2 -->
+        <!-- Mobile sidebar overlay -->
+        <div id="mobile-sidebar-overlay"></div>
+
+        <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Global Delete Confirmation
@@ -260,6 +272,36 @@
                 title: '{{ session('error') }}'
             });
         @endif
+    </script>
+    <script>
+        (function() {
+            const sidebar = document.getElementById('main-sidebar');
+            const openBtn = document.getElementById('mobile-menu-button');
+            const closeBtn = document.getElementById('mobile-close-button');
+            const overlay = document.getElementById('mobile-sidebar-overlay');
+
+            if (!sidebar || !openBtn || !overlay) return;
+
+            function openSidebar() {
+                sidebar.classList.add('mobile-open');
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('mobile-open');
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+
+            openBtn.addEventListener('click', (e) => { e.preventDefault(); openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeSidebar();
+            });
+        })();
     </script>
 </body>
 </html>
