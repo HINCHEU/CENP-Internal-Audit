@@ -1,0 +1,9 @@
+vendor
+node_modules
+.git
+.env
+storage/framework/cache/*
+storage/logs/*
+storage/framework/sessions/*
+.vscode
+docker-compose.override.yml
