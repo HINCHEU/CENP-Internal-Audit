@@ -54,7 +54,7 @@ services:
       - app-network
 
   node:
-    image: node:18
+    image: node:20
     container_name: cenp-node
     working_dir: /var/www
     volumes:

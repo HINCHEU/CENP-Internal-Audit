@@ -31,6 +31,11 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+
+# Before composer install, ensure /var/www is owned correctly
+RUN chown -R www-data:www-data /var/www
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
