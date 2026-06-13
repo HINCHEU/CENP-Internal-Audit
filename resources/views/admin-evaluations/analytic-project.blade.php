@@ -5,7 +5,10 @@
 @section('subheader', 'View evaluation scores aggregated by project and dates.')
 
 @section('content')
-<div class="mb-6 flex justify-end">
+<div class="mb-6 flex justify-end gap-3">
+    <a href="{{ route('admin-evaluations.analytic-project.export') }}" class="px-5 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-colors font-bold premium-shadow flex items-center gap-2">
+        <i class="ph ph-file-xls text-xl"></i> Export to Excel
+    </a>
     <a href="{{ route('admin-evaluations.index') }}" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors font-medium premium-shadow flex items-center gap-2">
         <i class="ph ph-arrow-left text-lg"></i> Back to Evaluations
     </a>

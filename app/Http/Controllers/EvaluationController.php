@@ -73,6 +73,67 @@ class EvaluationController extends Controller
         return view('admin-evaluations.analytic-project', compact('projects', 'dates', 'projectScores'));
     }
 
+    public function exportAnalyticByUser()
+    {
+        $evaluations = \App\Models\Evaluation::orderBy('created_at', 'asc')->get();
+        
+        $users = \App\Models\User::with(['department', 'evaluationScores'])
+            ->whereHas('evaluationScores')
+            ->orderBy('name')
+            ->get();
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\AnalyticUserExport($evaluations, $users), 'Analytic-by-User.xlsx');
+    }
+
+    public function exportAnalyticByProject()
+    {
+        $projects = \App\Models\Project::orderBy('name')->get();
+        
+        $evaluations = \App\Models\Evaluation::with('scores')->orderBy('date', 'asc')->get();
+        
+        $dates = $evaluations->pluck('date')->filter()->unique()->sort()->values();
+        
+        $evaluationScores = [];
+        foreach ($evaluations as $evaluation) {
+            $inhouseScores = $evaluation->scores->where('evaluator_type', 'inhouse');
+            $externalScores = $evaluation->scores->where('evaluator_type', 'external');
+            $inhouseAverage = $inhouseScores->count() > 0 ? $inhouseScores->avg('score') : 0;
+            $totalExternalScore = $externalScores->sum('score');
+            $totalVoices = ($inhouseScores->count() > 0 ? 1 : 0) + $externalScores->count();
+            $finalScore = $totalVoices > 0 ? ($inhouseAverage + $totalExternalScore) / $totalVoices : null;
+            
+            $evaluationScores[$evaluation->id] = $finalScore;
+        }
+
+        $projectScores = [];
+        foreach ($projects as $project) {
+            $projectScores[$project->id] = [];
+            foreach ($dates as $date) {
+                $dateKey = $date->format('Y-m-d');
+                $projectEvals = $evaluations->where('project_id', $project->id)->filter(function($e) use ($dateKey) {
+                    return $e->date && $e->date->format('Y-m-d') === $dateKey;
+                });
+                
+                if ($projectEvals->count() > 0) {
+                    $totalScore = 0;
+                    $validEvals = 0;
+                    foreach ($projectEvals as $eval) {
+                        $score = $evaluationScores[$eval->id];
+                        if ($score !== null) {
+                            $totalScore += $score;
+                            $validEvals++;
+                        }
+                    }
+                    $projectScores[$project->id][$dateKey] = $validEvals > 0 ? $totalScore / $validEvals : null;
+                } else {
+                    $projectScores[$project->id][$dateKey] = null;
+                }
+            }
+        }
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\AnalyticProjectExport($projects, $dates, $projectScores), 'Analytic-by-Project.xlsx');
+    }
+
     public function create()
     {
         $projects = \App\Models\Project::orderBy('name')->get();

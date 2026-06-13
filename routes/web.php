@@ -51,6 +51,9 @@ Route::middleware('auth')->group(function () {
         
         Route::resource('audit-events', AuditEventController::class);
 
+        Route::get('/admin-evaluations/analytics/by-user/export', [\App\Http\Controllers\EvaluationController::class, 'exportAnalyticByUser'])->name('admin-evaluations.analytic-user.export');
+        Route::get('/admin-evaluations/analytics/by-project/export', [\App\Http\Controllers\EvaluationController::class, 'exportAnalyticByProject'])->name('admin-evaluations.analytic-project.export');
+
         Route::get('/admin-evaluations/analytics/by-user', [\App\Http\Controllers\EvaluationController::class, 'analyticByUser'])->name('admin-evaluations.analytic-user');
         Route::get('/admin-evaluations/analytics/by-project', [\App\Http\Controllers\EvaluationController::class, 'analyticByProject'])->name('admin-evaluations.analytic-project');
         Route::resource('admin-evaluations', \App\Http\Controllers\EvaluationController::class);
