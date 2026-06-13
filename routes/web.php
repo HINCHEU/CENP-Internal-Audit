@@ -51,6 +51,8 @@ Route::middleware('auth')->group(function () {
         
         Route::resource('audit-events', AuditEventController::class);
 
+        Route::get('/admin-evaluations/analytics/by-user', [\App\Http\Controllers\EvaluationController::class, 'analyticByUser'])->name('admin-evaluations.analytic-user');
+        Route::get('/admin-evaluations/analytics/by-project', [\App\Http\Controllers\EvaluationController::class, 'analyticByProject'])->name('admin-evaluations.analytic-project');
         Route::resource('admin-evaluations', \App\Http\Controllers\EvaluationController::class);
         
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

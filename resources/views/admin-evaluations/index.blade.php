@@ -12,9 +12,17 @@
             <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
             <input v-model="search" type="text" placeholder="Search evaluations..." class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all focus:bg-white">
         </div>
-        <a href="{{ route('admin-evaluations.create') }}" class="w-full sm:w-auto bg-gradient-primary hover:opacity-90 text-white px-6 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30 premium-hover">
-            <i class="ph ph-plus-circle text-xl"></i> Create Evaluation
-        </a>
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <a href="{{ route('admin-evaluations.analytic-user') }}" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border border-indigo-200">
+                <i class="ph ph-users text-xl"></i> Analytic by User
+            </a>
+            <a href="{{ route('admin-evaluations.analytic-project') }}" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border border-indigo-200">
+                <i class="ph ph-briefcase text-xl"></i> Analytic by Project
+            </a>
+            <a href="{{ route('admin-evaluations.create') }}" class="bg-gradient-primary hover:opacity-90 text-white px-6 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30 premium-hover">
+                <i class="ph ph-plus-circle text-xl"></i> Create
+            </a>
+        </div>
     </div>
 
     <!-- Table -->
