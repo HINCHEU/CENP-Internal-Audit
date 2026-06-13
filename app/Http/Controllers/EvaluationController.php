@@ -47,8 +47,10 @@ class EvaluationController extends Controller
         $totalVoices = ($inhouseScores->count() > 0 ? 1 : 0) + $externalScores->count();
         
         $finalScore = $totalVoices > 0 ? ($inhouseAverage + $totalExternalScore) / $totalVoices : 0;
+        
+        $overallGrade = $admin_evaluation->calculateGrade($finalScore);
 
-        return view('admin-evaluations.show', compact('admin_evaluation', 'inhouseScores', 'externalScores', 'inhouseAverage', 'finalScore', 'totalVoices'));
+        return view('admin-evaluations.show', compact('admin_evaluation', 'inhouseScores', 'externalScores', 'inhouseAverage', 'finalScore', 'totalVoices', 'overallGrade'));
     }
 
     public function edit(\App\Models\Evaluation $admin_evaluation)

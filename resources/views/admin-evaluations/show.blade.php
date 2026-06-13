@@ -4,6 +4,16 @@
 @section('header', 'Evaluation Analytics')
 @section('subheader', 'View scoring results and analytics for this evaluation.')
 
+@php
+    $gradeColorClass = match($overallGrade) {
+        'A+' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'A' => 'bg-green-50 text-green-700 border-green-200',
+        'B' => 'bg-blue-50 text-blue-700 border-blue-200',
+        'F' => 'bg-red-50 text-red-700 border-red-200',
+        default => 'bg-slate-50 text-slate-700 border-slate-200',
+    };
+@endphp
+
 @section('content')
 <div class="mb-6 flex items-start justify-between">
     <div>
@@ -39,7 +49,12 @@
                     <i class="ph ph-medal text-2xl text-white"></i>
                 </div>
                 <p class="text-indigo-100 font-medium uppercase tracking-wider text-xs mb-1">Overall Grade</p>
-                <h3 class="text-5xl font-black">{{ number_format($finalScore, 1) }}<span class="text-2xl text-indigo-200">/100</span></h3>
+                <div class="flex items-center gap-4 mt-2">
+                    <h3 class="text-5xl font-black">{{ number_format($finalScore, 1) }}<span class="text-2xl text-indigo-200">/100</span></h3>
+                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border {{ $gradeColorClass }}">
+                        Grade: <span class="text-lg">{{ $overallGrade }}</span>
+                    </span>
+                </div>
             </div>
             <div class="mt-6 pt-6 border-t border-white/10 flex justify-between items-end">
                 <p class="text-sm text-indigo-100">Calculated from {{ $totalVoices }} effective voices.</p>

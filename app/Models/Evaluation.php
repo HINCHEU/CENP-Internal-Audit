@@ -21,4 +21,17 @@ class Evaluation extends Model
     {
         return $this->hasMany(EvaluationScore::class);
     }
+
+    public function calculateGrade(float $score): string
+    {
+        if ($score >= 95) {
+            return 'A+';
+        } elseif ($score >= 90) {
+            return 'A';
+        } elseif ($score >= 85) {
+            return 'B';
+        } else {
+            return 'F';
+        }
+    }
 }
