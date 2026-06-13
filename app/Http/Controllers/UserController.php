@@ -29,7 +29,7 @@ class UserController extends Controller
             'role' => 'required|in:admin,super_user,normal_user',
             'department_id' => 'nullable|exists:departments,id',
             'status' => 'required|in:active,inactive',
-            'password' => 'nullable|string|min:6'
+            'password' => 'nullable|string|min:3'
         ]);
 
         if(!empty($validated['password'])) {
@@ -60,7 +60,7 @@ class UserController extends Controller
             'department_id' => 'nullable|exists:departments,id',
             'status' => 'required|in:active,inactive',
             'is_approved' => 'boolean',
-            'password' => 'nullable|string|min:6'
+            'password' => 'nullable|string|min:3'
         ]);
 
         if(!empty($validated['password'])) {

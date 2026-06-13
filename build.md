@@ -71,6 +71,7 @@ Wait for `exited with code 0` then proceed.
 ## 5. Laravel Setup (run in order)
 
 ```bash
+docker-compose exec -u root app composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 docker-compose exec -u root app php artisan key:generate
 docker-compose exec -u root app php artisan migrate --force
 docker-compose exec -u root app php artisan db:seed --class=DatabaseSeeder
