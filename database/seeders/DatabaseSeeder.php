@@ -15,9 +15,9 @@ class DatabaseSeeder extends Seeder
     {
         // Create departments (idempotent)
         $departments = [
-            ['name' => 'AFD', 'description' => '', 'status' => 'active'],
-            ['name' => 'BBD', 'description' => '', 'status' => 'active'],
-            ['name' => 'OPD', 'description' => '', 'status' => 'active'],
+            ['name' => 'AFD', 'description' => 'Admin and Finance Department', 'status' => 'active'],
+            ['name' => 'BDD', 'description' => 'Business Development Department', 'status' => 'active'],
+            ['name' => 'OPD', 'description' => 'Operations Department', 'status' => 'active'],
         ];
 
         foreach ($departments as $dept) {
