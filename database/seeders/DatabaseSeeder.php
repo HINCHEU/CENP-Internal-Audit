@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
             ['name' => 'AFD', 'description' => '', 'status' => 'active'],
             ['name' => 'BBD', 'description' => '', 'status' => 'active'],
             ['name' => 'OPD', 'description' => '', 'status' => 'active'],
-            ['name' => 'IT Infrastructure', 'description' => 'Manages all internal IT systems and networks.', 'status' => 'active'],
         ];
 
         foreach ($departments as $dept) {

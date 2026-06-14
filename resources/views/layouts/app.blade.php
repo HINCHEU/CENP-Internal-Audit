@@ -59,9 +59,9 @@
         <div class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden">
             <!-- Logo area -->
             <div class="h-24 flex items-center px-8 shrink-0">
-                <div class="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/10 mr-3">
+                <a href="{{ url('/') }}" class="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/10 mr-3">
                     <img src="{{ asset('images/logo.png') }}" alt="CE&P Logo" class="h-7 w-auto filter brightness-0 invert">
-                </div>
+                </a>
                 <div>
                     <h2 class="text-white font-bold text-lg tracking-tight leading-tight">CE&P Audit</h2>
                     <p class="text-indigo-300/70 text-[10px] font-semibold uppercase tracking-widest">Internal System</p>
