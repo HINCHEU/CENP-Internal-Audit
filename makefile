@@ -34,7 +34,6 @@ down:
 	docker-compose down
 
 notify:
-	notify:
 	$(eval SERVER_IP := $(shell curl -s ifconfig.me))
 	$(eval NOW := $(shell date '+%Y-%m-%d %H:%M:%S %Z'))
 	$(eval COMMIT_MSG := $(shell git log -1 --pretty=%B | head -1))
