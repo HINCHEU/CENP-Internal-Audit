@@ -34,10 +34,11 @@ down:
 	docker-compose down
 
 notify:
+	notify:
 	$(eval SERVER_IP := $(shell curl -s ifconfig.me))
 	$(eval NOW := $(shell date '+%Y-%m-%d %H:%M:%S %Z'))
 	$(eval COMMIT_MSG := $(shell git log -1 --pretty=%B | head -1))
 	curl -s -X POST "https://api.telegram.org/bot$(NOTIFY_TOKEN)/sendMessage" \
 		-d chat_id="$(NOTIFY_CHAT)" \
-		-d text="🚀 CENP Internal Audit updated%0A📌 Change: $(COMMIT_MSG)%0A🖥 Server: $(SERVER_IP)%0A🕐 Time: $(NOW)" \
+		-d text="🚀 CENP Internal Audit updated%0A📌 Change: $(COMMIT_MSG)%0A🖥 Server: $(SERVER_IP):8080%0A🕐 Time: $(NOW)" \
 		-d parse_mode="Markdown"
