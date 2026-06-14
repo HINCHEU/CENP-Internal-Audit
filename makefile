@@ -25,6 +25,17 @@ update:
 	docker-compose exec -u root app php artisan config:cache
 	docker-compose exec -u root app php artisan route:cache
 	docker-compose exec -u root app php artisan view:cache
-
+	$(MAKE) notify
+	
 down:
 	docker-compose down
+
+NOTIFY_TOKEN=8709811015:AAFyr4TC0ql-OqsRfi4IDdo1vQVRmFjTOsg
+NOTIFY_CHAT=-1004499878029
+SERVER_IP=$(shell curl -s ifconfig.me)
+
+notify:
+	curl -s -X POST "https://api.telegram.org/bot$(NOTIFY_TOKEN)/sendMessage" \
+		-d chat_id="$(NOTIFY_CHAT)" \
+		-d text="🚀 *CENP Internal Audit* updated%0AServer: $(SERVER_IP)%0ATime: $(shell date '+%Y-%m-%d %H:%M:%S %Z')" \
+		-d parse_mode="Markdown"
