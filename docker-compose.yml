@@ -46,8 +46,6 @@ services:
       MYSQL_DATABASE: cenp
       MYSQL_USER: cenp
       MYSQL_PASSWORD: secret
-    ports:
-      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
