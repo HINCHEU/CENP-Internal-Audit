@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\AuditFinding;
+use App\Models\AuditEvent;
 
 class AuditFindingController extends Controller
 {
@@ -27,9 +28,18 @@ class AuditFindingController extends Controller
             'score' => 'required|integer|min:0|max:100',
         ]);
 
+        $auditEvent = AuditEvent::with('auditors')->findOrFail($validated['audit_event_id']);
+        if (! $this->userCanAccessAuditEvent($auditEvent)) {
+            abort(403);
+        }
+
         $finding = AuditFinding::where('audit_event_id', $validated['audit_event_id'])
             ->where('user_id', \Illuminate\Support\Facades\Auth::id())
             ->first();
+
+        if ($finding && $finding->edit_request_status !== 'approved') {
+            return redirect()->route('audits.index')->with('error', 'You have already submitted an audit for this event. Request edit if you need to make changes.');
+        }
 
         $evidencePath = $finding ? $finding->evidence_file_path : null;
         if ($request->hasFile('evidence_file')) {
@@ -74,6 +84,10 @@ class AuditFindingController extends Controller
     public function show($id)
     {
         $finding = AuditFinding::with(['auditEvent.project', 'auditEvent.auditors', 'auditEvent.findings', 'auditor'])->findOrFail($id);
+
+        if (! $this->userCanAccessAuditEvent($finding->auditEvent)) {
+            abort(403);
+        }
         
         // Parse score and description if needed
         $parsedScore = null;
@@ -86,5 +100,24 @@ class AuditFindingController extends Controller
         }
 
         return view('audit-findings.show', compact('finding', 'parsedScore', 'parsedDescription'));
+    }
+
+    private function userCanAccessAuditEvent(AuditEvent $auditEvent): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        if (! $auditEvent->relationLoaded('auditors')) {
+            $auditEvent->load('auditors');
+        }
+
+        return $auditEvent->auditors->contains('id', $user->id);
     }
 }

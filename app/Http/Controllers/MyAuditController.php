@@ -26,6 +26,11 @@ class MyAuditController extends Controller
     public function show($id)
     {
         $auditEvent = AuditEvent::with(['project', 'auditors'])->findOrFail($id);
+
+        $isAssigned = $auditEvent->auditors->contains('id', Auth::id());
+        if (!$isAssigned) {
+            abort(403);
+        }
         
         $finding = AuditFinding::where('audit_event_id', $id)
             ->where('user_id', Auth::id())

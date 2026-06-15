@@ -30,11 +30,19 @@ class UserEvaluationController extends Controller
             ->where('user_id', auth()->id())
             ->first();
 
+        if (auth()->user()->role !== 'admin' && ! $existingScore && $evaluation->status !== 'active') {
+            abort(403);
+        }
+
         return view('user-evaluations.show', compact('evaluation', 'existingScore'));
     }
 
     public function storeScore(Request $request, \App\Models\Evaluation $evaluation)
     {
+        if (auth()->user()->role !== 'admin' && $evaluation->status !== 'active') {
+            abort(403);
+        }
+
         $request->validate([
             'evaluator_type' => 'required|in:inhouse,external',
             'score' => 'required|integer|min:0|max:100',

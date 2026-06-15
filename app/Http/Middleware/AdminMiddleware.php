@@ -21,7 +21,7 @@ class AdminMiddleware
 
         // If not admin, redirect to my-audits silently
         if (auth()->check()) {
-            return redirect()->route('audits.index');
+            abort(403);
         }
 
         return redirect()->route('login');
