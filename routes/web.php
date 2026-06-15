@@ -12,6 +12,10 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
+    if (auth()->check() && auth()->user()->role !== 'admin') {
+        return redirect()->route('audits.index');
+    }
+
     return redirect()->route('dashboard');
 });
 
