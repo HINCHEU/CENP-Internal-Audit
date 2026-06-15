@@ -68,7 +68,7 @@
                     <td class="px-6 py-5 text-slate-600 font-medium text-sm">{{ $e->scores_count }}</td>
                     <td class="px-6 py-5 text-slate-500 font-medium text-sm">{{ $e->created_at->format('M d, Y') }}</td>
                     <td class="px-8 py-5 text-right">
-                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="flex items-center justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             <a href="{{ route('admin-evaluations.show', $e->id) }}" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="View Analytics">
                                 <i class="ph ph-chart-line-up text-lg"></i>
                             </a>
