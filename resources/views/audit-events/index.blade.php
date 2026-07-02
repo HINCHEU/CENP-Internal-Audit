@@ -20,9 +20,17 @@
                 <option value="completed">Completed</option>
             </select>
         </div>
-        <a href="{{ route('audit-events.create') }}" class="w-full sm:w-auto bg-gradient-primary hover:opacity-90 text-white px-6 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30 premium-hover">
-            <i class="ph ph-calendar-plus text-xl"></i> Schedule Audit
-        </a>
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <a href="{{ route('audit-events.analytic-user') }}" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border border-indigo-200">
+                <i class="ph ph-users text-xl"></i> Analytic by User
+            </a>
+            <a href="{{ route('audit-events.analytic-project') }}" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border border-indigo-200">
+                <i class="ph ph-briefcase text-xl"></i> Analytic by Project
+            </a>
+            <a href="{{ route('audit-events.create') }}" class="bg-gradient-primary hover:opacity-90 text-white px-6 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30 premium-hover">
+                <i class="ph ph-calendar-plus text-xl"></i> Schedule Audit
+            </a>
+        </div>
     </div>
 
     <!-- Table -->
@@ -114,7 +122,7 @@
                         @include('audit-events.partials.submission-status-badge', ['status' => $event->submissionStatus()])
                     </td>
                     <td class="px-8 py-5 text-right">
-                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="flex items-center justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             <button
                                 type="button"
                                 class="qr-trigger p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
@@ -159,8 +167,12 @@
     </div>
 </div>
 
-<div id="qr-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
-    <div id="qr-modal-content" class="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+<div id="qr-modal" class="fixed inset-0 z-[99999] hidden items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
+    <div id="qr-modal-content" class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+        <div id="qr-copy-message" class="pointer-events-none absolute left-1/2 top-4 z-10 hidden -translate-x-1/2 items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-xl">
+            <i class="ph ph-check-circle text-base text-emerald-300"></i>
+            <span id="qr-copy-message-text">Link copied</span>
+        </div>
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
             <div class="min-w-0 pr-4">
                 <h3 id="qr-modal-title" class="text-lg font-extrabold text-slate-900 truncate">QR Code</h3>
@@ -375,9 +387,56 @@
         const qrUrlText = document.getElementById('qr-url-text');
         const qrModalTitle = document.getElementById('qr-modal-title');
         const qrCopyLink = document.getElementById('qr-copy-link');
+        const qrCopyMessage = document.getElementById('qr-copy-message');
+        const qrCopyMessageText = document.getElementById('qr-copy-message-text');
         const qrDownload = document.getElementById('qr-download');
         let currentQrUrl = '';
         let currentEventId = '';
+        let copyMessageTimer = null;
+
+        if (qrModal && qrModal.parentElement !== document.body) {
+            document.body.appendChild(qrModal);
+        }
+
+        function showCopyMessage(message, iconClass, iconColorClass) {
+            if (!qrCopyMessage) return;
+
+            const icon = qrCopyMessage.querySelector('i');
+
+            if (icon) {
+                icon.className = 'ph ' + iconClass + ' text-base ' + iconColorClass;
+            }
+
+            if (qrCopyMessageText) {
+                qrCopyMessageText.textContent = message;
+            }
+
+            qrCopyMessage.classList.remove('hidden');
+            qrCopyMessage.classList.add('flex');
+
+            clearTimeout(copyMessageTimer);
+            copyMessageTimer = setTimeout(function() {
+                qrCopyMessage.classList.add('hidden');
+                qrCopyMessage.classList.remove('flex');
+            }, 1800);
+        }
+
+        function fallbackCopyText(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                return document.execCommand('copy');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
 
         function closeQrModal() {
             if (qrModal.classList.contains('hidden')) {
@@ -390,6 +449,8 @@
             setTimeout(function() {
                 qrModal.classList.add('hidden');
                 qrModal.classList.remove('flex');
+                qrCopyMessage.classList.add('hidden');
+                qrCopyMessage.classList.remove('flex');
                 const ctx = qrCanvas.getContext('2d');
                 ctx.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
                 qrUrlText.textContent = '';
@@ -443,16 +504,39 @@
                 return;
             }
 
-            navigator.clipboard.writeText(currentQrUrl).then(function() {
+            function copied() {
+                showCopyMessage('Link copied', 'ph-check-circle', 'text-emerald-300');
                 Toast.fire({ icon: 'success', title: 'Link copied to clipboard' });
-            }).catch(function() {
+            }
+
+            function copyManually() {
                 const range = document.createRange();
                 range.selectNodeContents(qrUrlText);
                 const selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(range);
+                showCopyMessage('Select and copy manually', 'ph-info', 'text-sky-300');
                 Toast.fire({ icon: 'info', title: 'Select the link and copy manually' });
-            });
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(currentQrUrl)
+                    .then(copied)
+                    .catch(function() {
+                        if (fallbackCopyText(currentQrUrl)) {
+                            copied();
+                        } else {
+                            copyManually();
+                        }
+                    });
+                return;
+            }
+
+            if (fallbackCopyText(currentQrUrl)) {
+                copied();
+            } else {
+                copyManually();
+            }
         });
 
         qrDownload.addEventListener('click', function() {

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\AuditEvent;
 use App\Models\Project;
 use App\Models\User;
+use Carbon\Carbon;
 
 class AuditEventController extends Controller
 {
@@ -14,6 +15,63 @@ class AuditEventController extends Controller
     {
         $events = AuditEvent::with(['project', 'auditors', 'findings'])->latest()->paginate(10);
         return view('audit-events.index', compact('events'));
+    }
+
+    public function analyticByUser()
+    {
+        $events = AuditEvent::with('findings')
+            ->orderBy('audit_date', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $users = User::with(['department', 'submittedFindings'])
+            ->whereHas('auditEvents')
+            ->orderBy('name')
+            ->get();
+
+        return view('audit-events.analytic-user', compact('events', 'users'));
+    }
+
+    public function analyticByProject()
+    {
+        $projects = Project::orderBy('name')->get();
+
+        $events = AuditEvent::with(['project', 'findings'])
+            ->orderBy('audit_date', 'asc')
+            ->get();
+
+        $dates = $events
+            ->pluck('audit_date')
+            ->filter()
+            ->map(fn ($date) => Carbon::parse($date)->startOfDay())
+            ->unique(fn (Carbon $date) => $date->format('Y-m-d'))
+            ->sort()
+            ->values();
+
+        $projectScores = [];
+        foreach ($projects as $project) {
+            $projectScores[$project->id] = [];
+
+            foreach ($dates as $date) {
+                $dateKey = $date->format('Y-m-d');
+                $projectEvents = $events->filter(function (AuditEvent $event) use ($project, $dateKey) {
+                    return $event->project_id === $project->id
+                        && $event->audit_date
+                        && Carbon::parse($event->audit_date)->format('Y-m-d') === $dateKey;
+                });
+
+                $scores = $projectEvents
+                    ->flatMap(fn (AuditEvent $event) => $event->findings)
+                    ->map(fn ($finding) => $finding->parsedScore())
+                    ->filter(fn ($score) => $score !== null);
+
+                $projectScores[$project->id][$dateKey] = $scores->isNotEmpty()
+                    ? round($scores->avg(), 2)
+                    : null;
+            }
+        }
+
+        return view('audit-events.analytic-project', compact('projects', 'dates', 'projectScores'));
     }
 
     public function create()
