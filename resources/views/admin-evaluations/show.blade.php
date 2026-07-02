@@ -103,6 +103,7 @@
             <thead>
                 <tr class="bg-white text-slate-500 text-[11px] uppercase tracking-wider font-extrabold border-b border-slate-100">
                     <th class="px-8 py-5">Evaluator</th>
+                    <th class="px-6 py-5">Department</th>
                     <th class="px-6 py-5">Type</th>
                     <th class="px-6 py-5">Score</th>
                     <th class="px-8 py-5">Comment</th>
@@ -113,9 +114,15 @@
                 <tr class="hover:bg-slate-50 transition-colors">
                     <td class="px-8 py-5">
                         <div class="flex items-center gap-3">
-                            <img class="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-50" src="https://ui-avatars.com/api/?name={{ urlencode($score->user->name) }}&background=6366F1&color=fff" alt="" />
-                            <p class="text-slate-800 font-bold text-sm">{{ $score->user->name }}</p>
+                            @php
+                                $displayName = $score->evaluator_name ?? ($score->user ? $score->user->name : 'Anonymous');
+                            @endphp
+                            <img class="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-50" src="https://ui-avatars.com/api/?name={{ urlencode($displayName) }}&background=6366F1&color=fff" alt="" />
+                            <p class="text-slate-800 font-bold text-sm">{{ $displayName }}</p>
                         </div>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="text-slate-600 text-sm font-medium">{{ $score->department ? $score->department->name : '-' }}</span>
                     </td>
                     <td class="px-6 py-5">
                         @if($score->evaluator_type === 'inhouse')
@@ -139,7 +146,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="px-8 py-8 text-center text-slate-500 font-medium">
+                    <td colspan="5" class="px-8 py-8 text-center text-slate-500 font-medium">
                         No scores submitted yet.
                     </td>
                 </tr>

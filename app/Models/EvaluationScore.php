@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EvaluationScore extends Model
 {
-    protected $fillable = ['evaluation_id', 'user_id', 'evaluator_type', 'score', 'comment'];
+    protected $fillable = ['evaluation_id', 'user_id', 'department_id', 'evaluator_name', 'evaluator_type', 'score', 'comment'];
 
     public function evaluation()
     {
@@ -16,5 +16,10 @@ class EvaluationScore extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 }

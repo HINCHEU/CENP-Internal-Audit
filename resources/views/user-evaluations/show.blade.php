@@ -51,6 +51,14 @@
                             <span class="text-2xl font-black text-indigo-600">{{ $existingScore->score }}<span class="text-sm text-indigo-300">/100</span></span>
                         </div>
                         <div class="mb-4">
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider block mb-1">Evaluator Name</span>
+                            <span class="text-slate-800 font-bold">{{ $existingScore->evaluator_name ?? 'Anonymous' }}</span>
+                        </div>
+                        <div class="mb-4">
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider block mb-1">Department</span>
+                            <span class="text-slate-800 font-medium">{{ $existingScore->department ? $existingScore->department->name : '-' }}</span>
+                        </div>
+                        <div class="mb-4">
                             <span class="text-sm font-bold text-slate-500 uppercase tracking-wider block mb-1">Evaluator Type</span>
                             <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-700">
                                 {{ $existingScore->evaluator_type }}
@@ -71,6 +79,28 @@
                     <div>
                         <h3 class="text-xl font-bold text-slate-800 mb-2">Submit Your Evaluation</h3>
                         <p class="text-sm font-medium text-slate-500">Please provide your honest score and feedback.</p>
+                    </div>
+
+                    <!-- Evaluator Name -->
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Your Name <span class="text-rose-500">*</span></label>
+                        <input type="text" name="evaluator_name" value="{{ old('evaluator_name', auth()->user()->name ?? '') }}" required placeholder="Enter your full name" class="w-full px-5 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-700 outline-none shadow-sm">
+                        @error('evaluator_name')<p class="text-rose-500 text-xs mt-2">{{ $message }}</p>@enderror
+                    </div>
+
+                    <!-- Department -->
+                    <div class="relative">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Department <span class="text-rose-500">*</span></label>
+                        <select name="department_id" required class="w-full px-5 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-medium text-slate-700 outline-none shadow-sm appearance-none">
+                            <option value="">Select your department...</option>
+                            @foreach($departments as $dept)
+                                <option value="{{ $dept->id }}" {{ old('department_id', auth()->user()->department_id ?? '') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute right-4 top-[38px] pointer-events-none text-slate-400">
+                            <i class="ph ph-caret-down text-lg"></i>
+                        </div>
+                        @error('department_id')<p class="text-rose-500 text-xs mt-2">{{ $message }}</p>@enderror
                     </div>
 
                     <!-- Evaluator Type -->

@@ -115,9 +115,9 @@
                         </a>
 
                         @php
-                            $hasSubmittedEvaluations = \App\Models\EvaluationScore::where('user_id', auth()->id())->exists();
+                            $hasSubmittedEvaluations = auth()->check() && \App\Models\EvaluationScore::where('user_id', auth()->id())->exists();
                         @endphp
-                        @if(auth()->user()->role === 'admin' || $hasSubmittedEvaluations)
+                        @if(auth()->check() && (auth()->user()->role === 'admin' || $hasSubmittedEvaluations))
                         <a href="{{ route('user-evaluations.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('user-evaluations.*') ? 'active' : '' }}">
                             <i class="ph ph-star-half text-xl transition-colors"></i> Score Evaluations
                         </a>

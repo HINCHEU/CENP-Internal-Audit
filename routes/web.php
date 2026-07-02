@@ -26,6 +26,10 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.post')->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
+// Quick Evaluations (Public user side)
+Route::get('/evaluations/{evaluation}', [\App\Http\Controllers\UserEvaluationController::class, 'show'])->name('user-evaluations.show');
+Route::post('/evaluations/{evaluation}/score', [\App\Http\Controllers\UserEvaluationController::class, 'storeScore'])->name('user-evaluations.score');
+
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
     
@@ -37,10 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('audit-findings', AuditFindingController::class)->except(['index', 'show']);
     Route::get('/audit-findings/{id}', [AuditFindingController::class, 'show'])->name('audit-findings.show');
 
-    // Quick Evaluations (User side)
+    // Quick Evaluations (User side index)
     Route::get('/evaluations', [\App\Http\Controllers\UserEvaluationController::class, 'index'])->name('user-evaluations.index');
-    Route::get('/evaluations/{evaluation}', [\App\Http\Controllers\UserEvaluationController::class, 'show'])->name('user-evaluations.show');
-    Route::post('/evaluations/{evaluation}/score', [\App\Http\Controllers\UserEvaluationController::class, 'storeScore'])->name('user-evaluations.score');
 
     // Admin-Only Routes
     Route::middleware('admin')->group(function () {
