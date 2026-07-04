@@ -80,6 +80,10 @@ class UserEvaluationController extends Controller
             'comment' => $request->comment,
         ]);
 
-        return redirect()->route('user-evaluations.index')->with('success', 'Your score has been submitted successfully.');
+        return redirect()->route('user-evaluations.thank-you', $evaluation->id)->with('success', 'Your score has been submitted successfully.');
+    }
+    public function thankYou(\App\Models\Evaluation $evaluation)
+    {
+        return view('user-evaluations.thank-you', compact('evaluation'));
     }
 }

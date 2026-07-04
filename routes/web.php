@@ -18,7 +18,8 @@ Route::get('/', function () {
         return redirect()->route('audits.index');
     }
 
-    return redirect()->route('dashboard');
+    // return redirect()->route('dashboard');
+    return redirect()->route('user-evaluations.index');
 });
 
 // Auth Routes
@@ -33,6 +34,7 @@ Route::get('/evaluations/{evaluation}', [UserEvaluationController::class, 'show'
 Route::post('/evaluations/{evaluation}/score', [UserEvaluationController::class, 'storeScore'])
     ->name('user-evaluations.score')
     ->middleware('throttle:evaluation-submissions');
+Route::get('/evaluations/{evaluation}/thank-you', [UserEvaluationController::class, 'thankYou'])->name('user-evaluations.thank-you');
 
 // Authenticated Routes
 Route::middleware('auth')->group(function () {

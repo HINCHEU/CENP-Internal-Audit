@@ -81,17 +81,17 @@
                 <div>
                     <p class="px-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Menu</p>
                     <div class="space-y-1">
-                        <a href="{{ route('dashboard') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        <!-- <a href="{{ route('dashboard') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                             <i class="ph ph-squares-four text-xl transition-colors"></i> Dashboard
-                        </a>
+                        </a> -->
                         
                         <a href="{{ route('projects.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('projects.*') ? 'active' : '' }}">
                             <i class="ph ph-briefcase text-xl transition-colors"></i> Projects
                         </a>
 
-                        <a href="{{ route('audit-events.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('audit-events.*') ? 'active' : '' }}">
+                        <!-- <a href="{{ route('audit-events.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('audit-events.*') ? 'active' : '' }}">
                             <i class="ph ph-calendar-check text-xl transition-colors"></i> Audit Events
-                        </a>
+                        </a> -->
 
                         <a href="{{ route('admin-evaluations.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('admin-evaluations.*') ? 'active' : '' }}">
                             <i class="ph ph-star text-xl transition-colors"></i> Quick Evaluations
@@ -103,7 +103,7 @@
                 <div>
                     <p class="px-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Auditor Workspace</p>
                     <div class="space-y-1">
-                        <a href="{{ route('audits.index') }}" class="nav-item flex items-center justify-between px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('audits.*') ? 'active' : '' }}">
+                        <!-- <a href="{{ route('audits.index') }}" class="nav-item flex items-center justify-between px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('audits.*') ? 'active' : '' }}">
                             <div class="flex items-center gap-3.5">
                                 <i class="ph ph-clipboard-text text-xl transition-colors"></i> My Audits
                             </div>
@@ -112,7 +112,7 @@
                                     {{ $pendingAuditsCount > 99 ? '99+' : $pendingAuditsCount }}
                                 </span>
                             @endif
-                        </a>
+                        </a> -->
 
                         @php
                             $hasSubmittedEvaluations = auth()->check() && \App\Models\EvaluationScore::where('user_id', auth()->id())->exists();
@@ -137,9 +137,9 @@
                             <i class="ph ph-users text-xl transition-colors"></i> Users
                         </a>
 
-                        <a href="{{ route('reports.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                        <!-- <a href="{{ route('reports.index') }}" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 font-medium text-sm {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                             <i class="ph ph-chart-polar text-xl transition-colors"></i> Reports & Analytics
-                        </a>
+                        </a> -->
                     </div>
                 </div>
                 @endif
@@ -189,14 +189,14 @@
                     <input type="text" placeholder="Quick search..." class="pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 w-64 shadow-sm transition-all duration-300 focus:w-72">
                 </div>
 
-                <a href="{{ route('audits.index') }}" class="relative p-2.5 text-slate-500 hover:text-indigo-600 transition-colors bg-white rounded-full premium-shadow premium-hover" title="My Audits">
+                <!-- <a href="{{ route('audits.index') }}" class="relative p-2.5 text-slate-500 hover:text-indigo-600 transition-colors bg-white rounded-full premium-shadow premium-hover" title="My Audits">
                     <i class="ph ph-bell text-xl"></i>
                     @if($pendingAuditsCount > 0)
                         <span class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold border-2 border-white">
                             {{ $pendingAuditsCount > 99 ? '99+' : $pendingAuditsCount }}
                         </span>
                     @endif
-                </a>
+                </a> -->
                 <button id="mobile-menu-button" class="p-2.5 text-slate-500 hover:text-indigo-600 transition-colors bg-white rounded-full premium-shadow premium-hover md:hidden" title="Open Menu">
                     <i class="ph ph-list text-xl"></i>
                 </button>
