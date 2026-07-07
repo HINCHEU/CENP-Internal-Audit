@@ -46,15 +46,19 @@
                             <p class="text-slate-800 font-bold text-sm whitespace-nowrap">{{ $user->name }}</p>
                         </td>
                         <td class="px-4 py-4 border-r border-slate-100 text-center text-slate-600 font-medium text-sm">{{ $user->gender ?? '-' }}</td>
-                        <td class="px-6 py-4 border-r border-slate-100 text-slate-600 font-medium text-sm whitespace-nowrap">{{ $user->role === 'admin' ? 'Administrator' : 'User' }}</td>
+                        <td class="px-6 py-4 border-r border-slate-100 text-slate-600 font-medium text-sm whitespace-nowrap">{{ $user->role === 'admin' ? 'Administrator' : ($user->role === 'guest' ? 'Guest' : 'User') }}</td>
                         <td class="px-6 py-4 border-r border-slate-100 text-slate-600 font-medium text-sm whitespace-nowrap">{{ $user->department->name ?? '-' }}</td>
                         
                         @foreach($evaluations as $evaluation)
                             @php
                                 $score = $user->evaluationScores->where('evaluation_id', $evaluation->id)->first();
                             @endphp
-                            <td class="px-6 py-4 border-r border-slate-100 text-center font-bold {{ $score ? 'text-indigo-600' : 'text-slate-300' }}">
-                                {{ $score ? $score->score : '-' }}
+                            <td class="px-6 py-4 border-r border-slate-100 text-center font-bold {{ $score && !$score->excluded ? 'text-indigo-600' : 'text-slate-300' }}">
+                                @if($score)
+                                    <span class="{{ $score->excluded ? 'line-through' : '' }}" title="{{ $score->excluded ? 'Excluded from analytics' : '' }}">{{ $score->score }}</span>
+                                @else
+                                    -
+                                @endif
                             </td>
                             <td class="px-6 py-4 border-r border-slate-100 text-sm text-slate-600 max-w-[200px] truncate" title="{{ $score ? $score->comment : '' }}">
                                 {{ $score && $score->comment ? $score->comment : '-' }}

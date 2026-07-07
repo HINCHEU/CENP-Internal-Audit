@@ -55,7 +55,7 @@ class UserEvaluationController extends Controller
             'evaluator_name' => 'required|string|max:255',
             'department_id' => 'required|exists:departments,id',
             'evaluator_type' => 'required|in:inhouse,external',
-            'score' => 'required|integer|min:0|max:100',
+            'score' => 'required|numeric|min:0|max:100|decimal:0,2',
             'comment' => 'nullable|string',
         ]);
 

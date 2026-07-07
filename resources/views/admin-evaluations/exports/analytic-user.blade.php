@@ -28,7 +28,7 @@
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->gender ?? '-' }}</td>
-                <td>{{ $user->role === 'admin' ? 'Administrator' : 'User' }}</td>
+                <td>{{ $user->role === 'admin' ? 'Administrator' : ($user->role === 'guest' ? 'Guest' : 'User') }}</td>
                 <td>{{ $user->department->name ?? '-' }}</td>
                 
                 @foreach($evaluations as $evaluation)

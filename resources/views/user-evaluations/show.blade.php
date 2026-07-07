@@ -148,7 +148,7 @@
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Score (0-100) <span class="text-rose-500">*</span></label>
                         <div class="relative max-w-xs">
-                            <input type="number" name="score" min="0" max="100" value="{{ old('score') }}" required class="w-full pl-5 pr-12 py-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-black text-2xl text-slate-800 outline-none shadow-sm text-center">
+                            <input type="number" step="any" name="score" min="0" max="100" value="{{ old('score') }}" required class="w-full pl-5 pr-12 py-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 hover:bg-white transition-colors font-black text-2xl text-slate-800 outline-none shadow-sm text-center">
                             <div class="absolute inset-y-0 right-0 pr-5 flex items-center pointer-events-none">
                                 <span class="text-slate-400 font-bold">/100</span>
                             </div>

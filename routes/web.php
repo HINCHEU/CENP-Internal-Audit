@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin-evaluations/analytics/by-user', [EvaluationController::class, 'analyticByUser'])->name('admin-evaluations.analytic-user');
         Route::get('/admin-evaluations/analytics/by-project', [EvaluationController::class, 'analyticByProject'])->name('admin-evaluations.analytic-project');
         Route::resource('admin-evaluations', EvaluationController::class);
+        Route::post('/admin-evaluations/scores/{score}/toggle-exclude', [EvaluationController::class, 'toggleExcludeScore'])->name('admin-evaluations.scores.toggle-exclude');
 
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 

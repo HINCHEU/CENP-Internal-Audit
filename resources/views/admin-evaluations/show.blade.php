@@ -98,6 +98,12 @@
     <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">Detailed Submissions</h3>
     </div>
+
+    @if(session('success'))
+    <div class="mx-6 mt-4 px-5 py-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-medium flex items-center gap-2 text-sm">
+        <i class="ph ph-check-circle text-lg"></i> {{ session('success') }}
+    </div>
+    @endif
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead>
@@ -107,18 +113,25 @@
                     <th class="px-6 py-5">Type</th>
                     <th class="px-6 py-5">Score</th>
                     <th class="px-8 py-5">Comment</th>
+                    <th class="px-6 py-5 text-center">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-                @forelse($admin_evaluation->scores as $score)
-                <tr class="hover:bg-slate-50 transition-colors">
+                @forelse($allScores as $score)
+                @php $isExcluded = $score->excluded; @endphp
+                <tr class="hover:bg-slate-50 transition-colors {{ $isExcluded ? 'opacity-50' : '' }}">
                     <td class="px-8 py-5">
                         <div class="flex items-center gap-3">
                             @php
                                 $displayName = $score->evaluator_name ?? ($score->user ? $score->user->name : 'Anonymous');
                             @endphp
                             <img class="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-50" src="https://ui-avatars.com/api/?name={{ urlencode($displayName) }}&background=6366F1&color=fff" alt="" />
-                            <p class="text-slate-800 font-bold text-sm">{{ $displayName }}</p>
+                            <div>
+                                <p class="text-slate-800 font-bold text-sm">{{ $displayName }}</p>
+                                @if($isExcluded)
+                                    <span class="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Excluded</span>
+                                @endif
+                            </div>
                         </div>
                     </td>
                     <td class="px-6 py-5">
@@ -136,17 +149,33 @@
                         @endif
                     </td>
                     <td class="px-6 py-5">
-                        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-100">
+                        <div class="inline-flex items-center justify-center w-15 h-10 rounded-md {{ $isExcluded ? 'bg-slate-100 text-slate-400 line-through border border-slate-200' : 'bg-indigo-50 text-indigo-700 border border-indigo-100' }} font-bold">
                             {{ $score->score }}
                         </div>
                     </td>
                     <td class="px-8 py-5 text-slate-600 text-sm">
                         {{ $score->comment ?: '-' }}
                     </td>
+                    <td class="px-6 py-5 text-center">
+                        <form action="{{ route('admin-evaluations.scores.toggle-exclude', $score->id) }}" method="POST">
+                            @csrf
+                            @if($isExcluded)
+                                <button type="submit" title="Include this score in analytics"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap">
+                                    <i class="ph ph-check-circle text-sm"></i> Include
+                                </button>
+                            @else
+                                <button type="submit" title="Exclude this score from analytics"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors whitespace-nowrap">
+                                    <i class="ph ph-x-circle text-sm"></i> Exclude
+                                </button>
+                            @endif
+                        </form>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-8 py-8 text-center text-slate-500 font-medium">
+                    <td colspan="6" class="px-8 py-8 text-center text-slate-500 font-medium">
                         No scores submitted yet.
                     </td>
                 </tr>

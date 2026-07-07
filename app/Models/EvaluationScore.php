@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class EvaluationScore extends Model
 {
-    protected $fillable = ['evaluation_id', 'user_id', 'department_id', 'evaluator_name', 'evaluator_type', 'score', 'comment'];
+    protected $fillable = ['evaluation_id', 'user_id', 'department_id', 'evaluator_name', 'evaluator_type', 'score', 'comment', 'excluded'];
+
+    protected $casts = ['excluded' => 'boolean'];
+
 
     public function evaluation()
     {

@@ -16,10 +16,7 @@ class EvaluationController extends Controller
     {
         $evaluations = \App\Models\Evaluation::orderBy('created_at', 'asc')->get();
         
-        $users = \App\Models\User::with(['department', 'evaluationScores'])
-            ->whereHas('evaluationScores')
-            ->orderBy('name')
-            ->get();
+        $users = $this->getEvaluatorsWithScores();
 
         return view('admin-evaluations.analytic-user', compact('evaluations', 'users'));
     }
@@ -77,10 +74,7 @@ class EvaluationController extends Controller
     {
         $evaluations = \App\Models\Evaluation::orderBy('created_at', 'asc')->get();
         
-        $users = \App\Models\User::with(['department', 'evaluationScores'])
-            ->whereHas('evaluationScores')
-            ->orderBy('name')
-            ->get();
+        $users = $this->getEvaluatorsWithScores();
 
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\AnalyticUserExport($evaluations, $users), 'Analytic-by-User.xlsx');
     }
@@ -156,15 +150,20 @@ class EvaluationController extends Controller
 
     public function show(\App\Models\Evaluation $admin_evaluation)
     {
-        $admin_evaluation->load(['scores.user']);
+        $admin_evaluation->load(['scores.user', 'scores.department']);
         
-        $inhouseScores = $admin_evaluation->scores->where('evaluator_type', 'inhouse');
-        $externalScores = $admin_evaluation->scores->where('evaluator_type', 'external');
+        // All scores for display in the table (including excluded)
+        $allScores = $admin_evaluation->scores;
 
-        // Analytics calculation
+        // Only non-excluded scores count toward analytics
+        $activeScores = $allScores->where('excluded', false);
+
+        $inhouseScores = $activeScores->where('evaluator_type', 'inhouse');
+        $externalScores = $activeScores->where('evaluator_type', 'external');
+
+        // Analytics calculation (excluded scores are ignored)
         $inhouseAverage = $inhouseScores->count() > 0 ? $inhouseScores->avg('score') : 0;
         
-        // Final score: inhouseAverage acts as 1 score, plus all external scores individually
         $totalExternalScore = $externalScores->sum('score');
         $totalVoices = ($inhouseScores->count() > 0 ? 1 : 0) + $externalScores->count();
         
@@ -172,7 +171,7 @@ class EvaluationController extends Controller
         
         $overallGrade = $admin_evaluation->calculateGrade($finalScore);
 
-        return view('admin-evaluations.show', compact('admin_evaluation', 'inhouseScores', 'externalScores', 'inhouseAverage', 'finalScore', 'totalVoices', 'overallGrade'));
+        return view('admin-evaluations.show', compact('admin_evaluation', 'allScores', 'inhouseScores', 'externalScores', 'inhouseAverage', 'finalScore', 'totalVoices', 'overallGrade'));
     }
 
     public function edit(\App\Models\Evaluation $admin_evaluation)
@@ -199,5 +198,41 @@ class EvaluationController extends Controller
     {
         $admin_evaluation->delete();
         return redirect()->route('admin-evaluations.index')->with('success', 'Evaluation deleted successfully.');
+    }
+
+    public function toggleExcludeScore(\App\Models\EvaluationScore $score)
+    {
+        $score->update(['excluded' => !$score->excluded]);
+        $message = $score->excluded ? 'Score excluded from analytics.' : 'Score included in analytics.';
+        return redirect()->back()->with('success', $message);
+    }
+
+    private function getEvaluatorsWithScores()
+    {
+        // Registered users who have scores
+        $users = \App\Models\User::with(['department', 'evaluationScores.department'])
+            ->whereHas('evaluationScores')
+            ->get();
+
+        // Guest scores (submitted without logging in, user_id is null)
+        $guestScores = \App\Models\EvaluationScore::with('department')
+            ->whereNull('user_id')
+            ->get()
+            ->groupBy('evaluator_name');
+
+        $guestUsers = collect();
+        foreach ($guestScores as $name => $scores) {
+            $guestUser = new \App\Models\User();
+            $guestUser->name = $name;
+            $guestUser->role = 'guest';
+            $guestUser->gender = null;
+            $guestUser->setRelation('department', $scores->first()->department);
+            $guestUser->setRelation('evaluationScores', $scores);
+            $guestUsers->push($guestUser);
+        }
+
+        return $users->concat($guestUsers)
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
     }
 }
