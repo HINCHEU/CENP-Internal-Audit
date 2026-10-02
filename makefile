@@ -1,4 +1,4 @@
-.PHONY: help install update restart down logs shell \
+.PHONY: help install seed update restart down logs shell \
         db-backup db-restore db-shell \
         cache-clear notify
 
@@ -21,6 +21,7 @@ help:
 	@echo "  CENP Internal Audit – Makefile Commands"
 	@echo "  ════════════════════════════════════════"
 	@echo "  make install       Fresh install (first time setup)"
+	@echo "  make seed          Run the database seeders"
 	@echo "  make update        Pull latest code + rebuild + migrate"
 	@echo "  make restart       Restart all containers"
 	@echo "  make down          Stop and remove all containers"
@@ -61,8 +62,7 @@ install:
 	@echo "▶ Running migrations..."
 	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan migrate --force
 
-	@echo "▶ Seeding database..."
-	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan db:seed --class=DatabaseSeeder
+	$(MAKE) seed
 
 	@echo "▶ Linking storage..."
 	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan storage:link
@@ -73,6 +73,13 @@ install:
 	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan view:cache
 
 	@echo "✅ Install complete! App is running at http://localhost:8080"
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  seed  – run the application database seeders
+# ─────────────────────────────────────────────────────────────────────────────
+seed:
+	@echo "▶ Seeding database..."
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan db:seed --class=DatabaseSeeder --force
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  update  – pull latest code, rebuild assets, run migrations
