@@ -4,7 +4,7 @@
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 COMPOSE        := docker compose
-APP_CONTAINER  := cenp-app
+APP_SERVICE    := app
 DB_CONTAINER   := cenp-db
 DB_NAME        := cenp
 DB_USER        := cenp
@@ -52,25 +52,25 @@ install:
 	$(COMPOSE) up node
 
 	@echo "▶ Installing PHP dependencies..."
-	$(COMPOSE) exec -u root $(APP_CONTAINER) composer install \
+	$(COMPOSE) exec -u root $(APP_SERVICE) composer install \
 		--no-interaction --prefer-dist --optimize-autoloader --no-dev
 
 	@echo "▶ Generating app key..."
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan key:generate
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan key:generate
 
 	@echo "▶ Running migrations..."
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan migrate --force
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan migrate --force
 
 	@echo "▶ Seeding database..."
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan db:seed --class=DatabaseSeeder
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan db:seed --class=DatabaseSeeder
 
 	@echo "▶ Linking storage..."
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan storage:link
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan storage:link
 
 	@echo "▶ Caching config / routes / views..."
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan config:cache
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan route:cache
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan view:cache
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan config:cache
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan route:cache
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan view:cache
 
 	@echo "✅ Install complete! App is running at http://localhost:8080"
 
@@ -85,7 +85,7 @@ update:
 	git pull origin main
 
 	@echo "▶ Installing/updating PHP dependencies..."
-	$(COMPOSE) exec -u root $(APP_CONTAINER) composer install \
+	$(COMPOSE) exec -u root $(APP_SERVICE) composer install \
 		--no-interaction --prefer-dist --optimize-autoloader --no-dev
 
 	@echo "▶ Rebuilding frontend assets..."
@@ -93,13 +93,13 @@ update:
 	$(COMPOSE) up node
 
 	@echo "▶ Running migrations..."
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan migrate --force
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan migrate --force
 
 	@echo "▶ Clearing and rebuilding caches..."
 	$(MAKE) cache-clear
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan config:cache
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan route:cache
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan view:cache
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan config:cache
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan route:cache
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan view:cache
 
 	@echo "✅ Update complete!"
 	$(MAKE) notify
@@ -124,23 +124,23 @@ down:
 #  logs  – tail app container logs (Ctrl+C to exit)
 # ─────────────────────────────────────────────────────────────────────────────
 logs:
-	$(COMPOSE) logs -f $(APP_CONTAINER)
+	$(COMPOSE) logs -f $(APP_SERVICE)
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  shell  – open bash in the app container
 # ─────────────────────────────────────────────────────────────────────────────
 shell:
-	$(COMPOSE) exec -u root $(APP_CONTAINER) bash
+	$(COMPOSE) exec -u root $(APP_SERVICE) bash
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  cache-clear  – clear all Laravel framework caches
 # ─────────────────────────────────────────────────────────────────────────────
 cache-clear:
 	@echo "▶ Clearing all caches..."
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan config:clear
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan route:clear
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan view:clear
-	$(COMPOSE) exec -u root $(APP_CONTAINER) php artisan cache:clear
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan config:clear
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan route:clear
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan view:clear
+	$(COMPOSE) exec -u root $(APP_SERVICE) php artisan cache:clear
 	@echo "✅ Caches cleared."
 
 # ─────────────────────────────────────────────────────────────────────────────
