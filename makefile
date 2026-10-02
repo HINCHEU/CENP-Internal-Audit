@@ -3,7 +3,7 @@
         cache-clear notify
 
 # ─── Configuration ────────────────────────────────────────────────────────────
-COMPOSE        := docker-compose
+COMPOSE        := docker compose
 APP_CONTAINER  := cenp-app
 DB_CONTAINER   := cenp-db
 DB_NAME        := cenp
